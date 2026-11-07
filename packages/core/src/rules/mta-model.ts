@@ -1,3 +1,4 @@
+import * as posix from 'path/posix';
 import { Project } from '../project';
 import { asArray, isPlainObject } from '../util';
 
@@ -35,7 +36,7 @@ export function mtaModules(p: Project): MtaModule[] {
     idx,
     name: str(m?.name) ?? '',
     type: str(m?.type),
-    path: str(m?.path),
+    path: normPath(str(m?.path)),
     requires: asArray(m?.requires).map((r: any, ridx) => ({
       name: str(r?.name) ?? '',
       idx: ridx,
@@ -61,6 +62,20 @@ export function mtaResources(p: Project): MtaResource[] {
 }
 
 /** All shell commands run in the global before-all build step. */
+/** "./app/ui/" -> "app/ui", "." stays ".". */
+function normPath(p: string | undefined): string | undefined {
+  if (p === undefined) return undefined;
+  const n = posix.normalize(p.replace(/\\/g, '/')).replace(/\/+$/, '');
+  return n || '.';
+}
+
+/** Joins a module path and a file inside it: join(".", "xs-app.json") is "xs-app.json". */
+export const joinPath = (...parts: string[]) => posix.join(...parts);
+
+/** True for an MTA written for the retired SAP BTP Neo environment, not Cloud Foundry. */
+export const isNeoMta = (p: Project) =>
+  mtaModules(p).some((m) => m.type?.startsWith('com.sap.hcp.')) || 'hcp-deployer-version' in obj(p.mta?.data.parameters);
+
 export function beforeAllCommands(p: Project): { cmd: string; path: (string | number)[] }[] {
   const out: { cmd: string; path: (string | number)[] }[] = [];
   const beforeAll = asArray(obj(p.mta?.data['build-parameters'])['before-all']);
@@ -95,6 +110,8 @@ export const isServiceManager = (r: MtaResource) => service(r) === 'service-mana
 export const isSaasRegistry = (r: MtaResource) => service(r) === 'saas-registry';
 export const isHtml5App = (m: MtaModule) => m.type === 'html5';
 export const isAppContent = (m: MtaModule) => m.type === 'com.sap.application.content';
+/** Older HTML5 deployer app (@sap/html5-app-deployer) that ships the apps in its own resources folder. */
+export const isLegacyHtml5Deployer = (m: MtaModule) => m.type === 'com.sap.html5.application-content';
 export const isMtxSidecar = (m: MtaModule) => (m.type === 'nodejs' || m.type === 'java') && /(^|\/)mtx(\/|$)/.test(m.path ?? '');
 
 /** Commands of a module's custom builder. */

@@ -4,6 +4,7 @@ import { crossRules } from './rules/cross';
 import { fioriRules } from './rules/fiori';
 import { mtaRules } from './rules/mta';
 import { mtxRules } from './rules/mtx';
+import { isNeoMta } from './rules/mta-model';
 import { repoRules } from './rules/repo';
 import { CheckResult, Finding, Severity } from './types';
 
@@ -22,6 +23,16 @@ export function runChecks(root: string): CheckResult {
       fix: 'Run the check in the root folder of your CAP or MTA project.',
       location: { file: '.' },
     });
+  } else if (p.mta && isNeoMta(p)) {
+    findings.push({
+      ruleId: 'GEN002',
+      severity: 'info',
+      title: 'Neo MTA not checked',
+      message: `${p.mta.rel} is written for the SAP BTP Neo environment, which SAP has retired. BTP Deploy Doctor only checks Cloud Foundry deployments.`,
+      fix: 'Migrate the app to Cloud Foundry, for example with the SAP Fiori tools Neo migration, then check the result.',
+      location: { file: p.mta.rel, line: 1 },
+    });
+    findings.push(...repoRules(p));
   } else {
     findings.push(...mtaRules(p), ...cdsRules(p), ...crossRules(p), ...fioriRules(p), ...mtxRules(p), ...repoRules(p));
   }

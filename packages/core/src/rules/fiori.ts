@@ -1,3 +1,4 @@
+import * as posix from 'path/posix';
 import { Document, isSeq } from 'yaml';
 import { addRequire, addResource, editJson, editYamlFile, levenshtein, setDependency, setScalar } from '../fix/edit';
 import { NPM_INSTALL, attach, combine, jsonFix, yamlFix } from '../fix/helpers';
@@ -12,6 +13,8 @@ import {
   isAppContent,
   isDestination,
   isHtml5App,
+  isLegacyHtml5Deployer,
+  joinPath,
   isRepoHost,
   isXsuaa,
   moduleCommands,
@@ -46,7 +49,12 @@ const npmScripts = (cmd: string) => [...cmd.matchAll(/npm run(?:-script)?\s+([\w
 export function fioriRules(p: Project): Finding[] {
   if (!p.mta || p.mta.errors.length) return [];
   const modules = mtaModules(p);
-  const apps = modules.filter((m) => isHtml5App(m) && m.path && p.exists(m.path));
+  // Old pattern: a "html5" module that is itself a running approuter app, not repository content.
+  const runsApprouter = (m: MtaModule) => {
+    const deps = p.json(joinPath(m.path ?? '.', 'package.json'))?.data?.dependencies;
+    return isPlainObject(deps) && '@sap/approuter' in deps;
+  };
+  const apps = modules.filter((m) => isHtml5App(m) && m.path && p.exists(m.path) && !runsApprouter(m));
   if (!apps.length) return [];
   const resources = mtaResources(p);
   const repoHosts = resources.filter(isRepoHost);
@@ -94,22 +102,30 @@ export function fioriRules(p: Project): Finding[] {
   const cloudServices = new Set(destinationEntries.map((d) => d.entry['sap.cloud.service']).filter((s): s is string => typeof s === 'string'));
   const onlyCloudService = cloudServices.size === 1 ? [...cloudServices][0] : undefined;
   const srvDestination = initDestinations.find((d) => typeof d.URL === 'string' && /srv-url|srv-api/.test(d.URL))?.Name as string | undefined;
-  const usesManagedApprouter = !modules.some(isApprouter);
+  // SAP Application Frontend service: serves apps from the repository without Work Zone.
+  const usesAppFront = resources.some((r) => r.parameters.service === 'app-front');
+  const usesManagedApprouter = !usesAppFront && !modules.some((m) => isApprouter(m) || (isHtml5App(m) && runsApprouter(m)));
+  /** Apps are served under their own path prefix, so absolute data source URIs miss the app's routes. */
+  const servedUnderAppPath = usesManagedApprouter || usesAppFront;
+  /** The older deployer copies the apps into its own folder, which this check cannot trace. */
+  const hasLegacyDeployer = modules.some(isLegacyHtml5Deployer);
+  const templated = (s: string) => /\$\{|~\{/.test(s);
 
   const webappDir = (m: MtaModule) => {
-    const w = p.yaml(`${m.path}/ui5.yaml`)?.data?.resources?.configuration?.paths?.webapp;
-    return `${m.path}/${typeof w === 'string' ? w : 'webapp'}`;
+    const w = p.yaml(joinPath(m.path!, 'ui5.yaml'))?.data?.resources?.configuration?.paths?.webapp;
+    return joinPath(m.path!, typeof w === 'string' ? w : 'webapp');
   };
-  const appPackage = (m: MtaModule): JsonFile | undefined => p.json(`${m.path}/package.json`);
+  const appPackage = (m: MtaModule): JsonFile | undefined => p.json(joinPath(m.path!, 'package.json'));
   const deployConfigRel = (m: MtaModule): string | undefined => {
     const scripts = appPackage(m)?.data.scripts ?? {};
     for (const cmd of moduleCommands(m)) {
       for (const name of npmScripts(cmd)) {
         const cfg = /--config[= ](\S+)/.exec(String(scripts[name] ?? ''));
-        if (cfg) return `${m.path}/${cfg[1]}`;
+        if (cfg) return joinPath(m.path!, cfg[1]);
       }
     }
-    return p.exists(`${m.path}/ui5-deploy.yaml`) ? `${m.path}/ui5-deploy.yaml` : undefined;
+    const def = joinPath(m.path!, 'ui5-deploy.yaml');
+    return p.exists(def) ? def : undefined;
   };
   const zipperOf = (m: MtaModule): Zipper | undefined => {
     const rel = deployConfigRel(m);
@@ -135,7 +151,7 @@ export function fioriRules(p: Project): Finding[] {
     const archive = zipper?.archiveName ?? entry?.artifacts[0]?.replace(/\.zip$/, '') ?? app.name.replace(/[^\w]/g, '');
 
     // UI001 – the app must be packaged by a content module
-    if (!entry) {
+    if (!entry && !hasLegacyDeployer) {
       const f = add('UI001', 'error', `Fiori app "${app.name}" is never deployed`, `The html5 module is built, but no com.sap.application.content module lists it under build-parameters > requires. Its files never reach the HTML5 application repository, so the app does not appear in Work Zone or the cockpit.`, `Add it to the app-content module, or run "cds add html5-repo" / Fiori tools "Add Deploy Config".`, mtaAt(['modules', app.idx]));
       const target = deployers.length === 1 ? deployers[0] : contentModules.filter((m) => m.requires.some((r) => repoHosts.some((h) => h.name === r.name))).length === 1 ? contentModules.find((m) => m.requires.some((r) => repoHosts.some((h) => h.name === r.name))) : undefined;
       if (target) {
@@ -166,8 +182,8 @@ export function fioriRules(p: Project): Finding[] {
           continue;
         }
         if (pkg.data.scripts?.[name]) continue;
-        const f = add('UI004', 'error', `Script "${name}" is missing in ${app.path}/package.json`, `mta.yaml runs "${cmd}" to build "${app.name}", but package.json has no "${name}" script. The MTA build fails with "Missing script".`, `Add the script to ${app.path}/package.json.`, { file: pkg.rel, line: p.jsonKeyLine(pkg, 'scripts') ?? 1 });
-        const deployYaml = zipper?.rel.slice(`${app.path}/`.length) ?? (p.exists(`${app.path}/ui5-deploy.yaml`) ? 'ui5-deploy.yaml' : undefined);
+        const f = add('UI004', 'error', `Script "${name}" is missing in ${pkg.rel}`, `mta.yaml runs "${cmd}" to build "${app.name}", but package.json has no "${name}" script. The MTA build fails with "Missing script".`, `Add the script to ${pkg.rel}.`, { file: pkg.rel, line: p.jsonKeyLine(pkg, 'scripts') ?? 1 });
+        const deployYaml = (zipper ? posix.relative(app.path!, zipper.rel) : undefined) ?? (p.exists(joinPath(app.path!, 'ui5-deploy.yaml')) ? 'ui5-deploy.yaml' : undefined);
         if (name === 'build:cf' && deployYaml) {
           attach(f, jsonFix(p, pkg.rel, `Add the standard "build:cf" script`, [{ path: ['scripts', 'build:cf'], value: `ui5 build preload --clean-dest --config ${deployYaml} --include-task=generateCachebusterInfo` }]));
         }
@@ -196,8 +212,8 @@ export function fioriRules(p: Project): Finding[] {
 
     // UI006 – xs-app.json exists and is packaged
     const webapp = webappDir(app);
-    const rootXsApp = `${app.path}/xs-app.json`;
-    const xsAppRel = p.exists(rootXsApp) ? rootXsApp : p.exists(`${webapp}/xs-app.json`) ? `${webapp}/xs-app.json` : undefined;
+    const rootXsApp = joinPath(app.path!, 'xs-app.json');
+    const xsAppRel = p.exists(rootXsApp) ? rootXsApp : p.exists(joinPath(webapp, 'xs-app.json')) ? joinPath(webapp, 'xs-app.json') : undefined;
     if (!xsAppRel) {
       const f = add('UI006', 'warning', `Fiori app "${app.name}" has no xs-app.json`, `Without xs-app.json, the approuter does not know how to serve the app or where to send its OData requests, so the app fails to load or its data calls return 404.`, `Create ${rootXsApp} with routes for your service and the HTML5 repository.`, mtaAt(['modules', app.idx, 'path']));
       const routes: Record<string, unknown>[] = [];
@@ -231,7 +247,11 @@ export function fioriRules(p: Project): Finding[] {
           }
           if (typeof route.destination === 'string' && knownDestinations.size && !knownDestinations.has(route.destination)) {
             const near = [...knownDestinations].find((d) => levenshtein(d.toLowerCase(), route.destination.toLowerCase()) <= 2);
-            const f = add('UI007', 'warning', `Route uses unknown destination "${route.destination}"`, `mta.yaml defines the destinations ${[...knownDestinations].map((d) => `"${d}"`).join(', ')}, but not "${route.destination}". Unless it was created by hand in the BTP cockpit, requests on this route fail.`, 'Use one of the defined destination names (they are case-sensitive), or create the destination.', { file: xsAppRel, line });
+            // A near miss is almost always a typo. Anything else is usually a backend
+            // destination created by hand in the BTP cockpit, such as "northwind".
+            const f = near
+              ? add('UI007', 'warning', `Route uses unknown destination "${route.destination}"`, `mta.yaml defines the destination "${near}", but the route uses "${route.destination}". Destination names are case-sensitive, so requests on this route fail.`, `Change it to "${near}", or create a destination named "${route.destination}".`, { file: xsAppRel, line })
+              : add('UI007', 'info', `Route uses destination "${route.destination}" from outside mta.yaml`, `mta.yaml does not create "${route.destination}". Make sure it exists in the BTP cockpit of every subaccount you deploy to, or requests on this route fail.`, 'Create the destination in the BTP cockpit (Connectivity > Destinations), or define it in mta.yaml.', { file: xsAppRel, line });
             if (near) {
               const routeIdx = asArray(xsApp.data.routes).indexOf(route);
               attach(f, jsonFix(p, xsAppRel, `Change to "${near}"`, [{ path: ['routes', routeIdx, 'destination'], value: near }]));
@@ -242,15 +262,15 @@ export function fioriRules(p: Project): Finding[] {
     }
 
     // UI008 / UI009 – manifest.json
-    const manifestRel = `${webapp}/manifest.json`;
+    const manifestRel = joinPath(webapp, 'manifest.json');
     const manifest = p.json(manifestRel);
     if (manifest && !manifest.error) {
       const cloud = manifest.data['sap.cloud'];
       const service = isPlainObject(cloud) && typeof cloud.service === 'string' ? cloud.service : undefined;
-      if (!service) {
+      if (!service && (usesManagedApprouter || cloudServices.size > 0)) {
         const f = add('UI008', 'warning', `manifest.json of "${app.name}" has no sap.cloud.service`, 'The managed approuter and Work Zone use "sap.cloud.service" to find the app and its destinations. Without it, the app is not listed under HTML5 Applications and cannot be added to a site.', `Add "sap.cloud": { "public": true, "service": "<your business service name>" } to manifest.json.`, { file: manifestRel, line: p.jsonKeyLine(manifest, 'sap.app') });
         if (onlyCloudService) attach(f, jsonFix(p, manifestRel, `Add sap.cloud.service "${onlyCloudService}"`, [{ path: ['sap.cloud'], value: { public: true, service: onlyCloudService } }]));
-      } else if (cloudServices.size && !cloudServices.has(service)) {
+      } else if (service && cloudServices.size && !cloudServices.has(service) && ![...cloudServices].some(templated)) {
         const f = add('UI008', 'error', `sap.cloud.service "${service}" does not match mta.yaml`, `The app says its business service is "${service}", but the destinations in mta.yaml use ${[...cloudServices].map((s) => `"${s}"`).join(', ')}. The app cannot reach its repository or authentication destinations and fails to start.`, 'Use the same sap.cloud.service value in manifest.json and in the destination content module.', { file: manifestRel, line: p.jsonKeyLine(manifest, 'sap.cloud') });
         if (onlyCloudService) attach(f, jsonFix(p, manifestRel, `Change to "${onlyCloudService}"`, [{ path: ['sap.cloud', 'service'], value: onlyCloudService }]));
       }
@@ -259,8 +279,8 @@ export function fioriRules(p: Project): Finding[] {
       const absolute = isPlainObject(sources)
         ? Object.entries(sources).filter(([, ds]: [string, any]) => typeof ds?.uri === 'string' && /^\/(?!\/)/.test(ds.uri))
         : [];
-      if (absolute.length && usesManagedApprouter) {
-        const f = add('UI009', 'warning', `Absolute data source URI in "${app.name}"`, `${absolute.map(([n, ds]: [string, any]) => `"${n}" uses "${ds.uri}"`).join('; ')}. In the managed approuter and Work Zone, the app is served under its own path, so an absolute URI skips the app's xs-app.json routes and returns 404.`, 'Make the URI relative (remove the leading "/"). If you also run the app with "cds watch", check it still loads there.', { file: manifestRel, line: p.jsonKeyLine(manifest, 'dataSources') });
+      if (absolute.length && servedUnderAppPath) {
+        const f = add('UI009', 'warning', `Absolute data source URI in "${app.name}"`, `${absolute.map(([n, ds]: [string, any]) => `"${n}" uses "${ds.uri}"`).join('; ')}. ${usesAppFront ? 'In the Application Frontend service' : 'In the managed approuter and Work Zone'}, the app is served under its own path, so an absolute URI skips the app's xs-app.json routes and returns 404.`, 'Make the URI relative (remove the leading "/"). If you also run the app with "cds watch", check it still loads there.', { file: manifestRel, line: p.jsonKeyLine(manifest, 'dataSources') });
         const fix = jsonFix(p, manifestRel, 'Make the data source URIs relative', absolute.map(([n, ds]: [string, any]) => ({ path: ['sap.app', 'dataSources', n, 'uri'], value: String(ds.uri).replace(/^\/+/, '') })));
         if (fix) fix.requiresReview = true;
         attach(f, fix);

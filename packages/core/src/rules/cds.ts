@@ -113,7 +113,10 @@ export function cdsRules(p: Project): Finding[] {
     add('CDS003', 'warning', 'mta.yaml deploys HANA, but CAP production does not use it', prodDb ? `The production db kind is "${prodDb}", while mta.yaml has an HDI deployer. The service will not read the tables you deploy.` : 'mta.yaml has an HDI deployer, but the production profile has no db configured and @cap-js/hana is not installed.', 'Run "cds add hana", which sets "[production]": { "db": "hana" } and installs @cap-js/hana.');
   } else if (prodDb === 'sqlite') {
     // CDS007 – sqlite in production
-    add('CDS007', 'warning', 'Production uses SQLite', 'Cloud Foundry containers have an ephemeral file system, so SQLite data is lost on every restart, and each instance has its own copy.', 'Use SAP HANA Cloud in production ("cds add hana"). Keep SQLite for development only.');
+    const db = prod.requires?.db;
+    const inMemory = typeof db === 'object' && db?.credentials?.database === ':memory:';
+    if (inMemory) add('CDS007', 'info', 'Production uses an in-memory SQLite database', 'Fine for a demo: the data is reset to the initial CSV content on every restart, and each instance has its own copy.', 'Use SAP HANA Cloud ("cds add hana") before real users store data.');
+    else add('CDS007', 'warning', 'Production uses SQLite', 'Cloud Foundry containers have an ephemeral file system, so SQLite data is lost on every restart, and each instance has its own copy.', 'Use SAP HANA Cloud in production ("cds add hana"). Keep SQLite for development only.');
   }
 
   // CDS004 – real auth in development breaks cds watch

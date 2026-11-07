@@ -13,6 +13,7 @@ import {
   isHdiContainer,
   isIdentity,
   isXsuaa,
+  joinPath,
   mtaModules,
   mtaResources,
 } from './mta-model';
@@ -154,8 +155,15 @@ export function mtaRules(p: Project): Finding[] {
   let offeredBuildStep = false;
   for (const m of modules) {
     if (!m.path || p.exists(m.path)) continue;
-    const generated = /^(\.\/)?gen(\/|$)/.test(m.path);
-    if (generated && runsCdsBuild) continue;
+    const generated = /(^|\/)gen(\/|$)/.test(m.path);
+    const atRoot = /^gen(\/|$)/.test(m.path);
+    // Any before-all step may create the folder, e.g. "npm run build" that runs cds build,
+    // or "cp -R ui/dist router/dist". Only a missing gen/ folder with no build step at all is certain.
+    if (generated && (runsCdsBuild || commands.length)) continue;
+    if (!generated && commands.length) {
+      add('MTA005', 'warning', `Module path "${m.path}" does not exist yet`, `Module "${m.name}" points to "${m.path}", which is not in the project. A before-all build step may create it; if not, the MTA build fails.`, 'Check that a build step creates this folder, or correct the path relative to mta.yaml.', ['modules', m.idx, 'path']);
+      continue;
+    }
     const f = add(
       'MTA005',
       'error',
@@ -168,7 +176,7 @@ export function mtaRules(p: Project): Finding[] {
         : 'Correct the path relative to mta.yaml.',
       ['modules', m.idx, 'path'],
     );
-    if (generated && !offeredBuildStep) {
+    if (generated && atRoot && !offeredBuildStep) {
       offeredBuildStep = true;
       attach(f, yamlFix(p, 'Add a before-all step that runs "npx cds build --production"', (doc) => addBeforeAllCommand(doc, 'npx cds build --production')));
     }
@@ -218,8 +226,8 @@ export function mtaRules(p: Project): Finding[] {
 
   // MTA009 – approuter needs xs-app.json
   for (const m of modules.filter(isApprouter)) {
-    if (m.path && p.exists(m.path) && !p.exists(`${m.path}/xs-app.json`)) {
-      add('MTA009', 'warning', `Approuter "${m.name}" has no xs-app.json`, `"${m.path}/xs-app.json" is missing, so the approuter has no routes and every request returns 404.`, 'Add xs-app.json with routes to your service and UI, or run "cds add approuter".', ['modules', m.idx, 'path']);
+    if (m.path && p.exists(m.path) && !p.exists(joinPath(m.path, 'xs-app.json'))) {
+      add('MTA009', 'warning', `Approuter "${m.name}" has no xs-app.json`, `"${joinPath(m.path, 'xs-app.json')}" is missing, so the approuter has no routes and every request returns 404.`, 'Add xs-app.json with routes to your service and UI, or run "cds add approuter".', ['modules', m.idx, 'path']);
     }
   }
 

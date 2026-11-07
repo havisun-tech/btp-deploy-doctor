@@ -56,4 +56,5 @@ export function destinationServices(resolved: any): { name: string; destination:
 export const REAL_AUTH_KINDS = ['xsuaa', 'ias', 'jwt'];
 export const MOCK_AUTH_KINDS = ['mocked', 'dummy', 'basic'];
 export const HANA_DB_KINDS = ['hana', 'hana-cloud', 'hana-mt'];
-export const HANA_DRIVERS = ['@cap-js/hana', 'hdb', '@sap/hana-client'];
+// @sap/cds-hana is the CAP 7 adapter package; it brings hdb with it.
+export const HANA_DRIVERS = ['@cap-js/hana', '@sap/cds-hana', 'hdb', '@sap/hana-client'];
