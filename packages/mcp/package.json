@@ -4,7 +4,7 @@
   "description": "MCP server that lets AI assistants check, fix and diagnose SAP BTP / CAP deployments.",
   "license": "Apache-2.0",
   "author": {
-    "name": "Havisun",
+    "name": "HAVISUN Technologies Inc.",
     "url": "https://www.havisun.com"
   },
   "homepage": "https://github.com/havisun-tech/btp-deploy-doctor#readme",

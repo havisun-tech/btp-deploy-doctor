@@ -4,7 +4,7 @@
   "description": "Finds and explains SAP BTP / CAP deployment problems before and after cf deploy.",
   "license": "Apache-2.0",
   "author": {
-    "name": "Havisun",
+    "name": "HAVISUN Technologies Inc.",
     "url": "https://www.havisun.com"
   },
   "homepage": "https://github.com/havisun-tech/btp-deploy-doctor#readme",

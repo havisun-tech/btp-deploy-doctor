@@ -49,4 +49,4 @@ The same checks run as a CLI for CI pipelines and as an MCP server for AI assist
 
 Not covered yet: CAP Java and Kyma.
 
-Made by [Havisun](https://www.havisun.com). Licensed under Apache 2.0.
+Made by [HAVISUN Technologies](https://www.havisun.com). Licensed under Apache 2.0.
