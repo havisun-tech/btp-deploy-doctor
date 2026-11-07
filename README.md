@@ -5,6 +5,8 @@
 
 Finds SAP BTP / CAP deployment mistakes **before** `cf deploy`, fixes most of them automatically, and explains failed deploy and app logs **after** it. Covers CAP services, Fiori apps in the HTML5 application repository (managed approuter, Work Zone) and multitenant SaaS apps.
 
+![BTP Deploy Doctor finds deployment problems, fixes them and explains a failed deploy log](media/btp-deploy-doctor-demo.gif)
+
 | Package | What it is |
 |---|---|
 | [`packages/core`](packages/core) | `btp-doctor` CLI and library: project checks, log analyzer, cf log fetching |
