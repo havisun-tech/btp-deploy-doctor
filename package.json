@@ -1,0 +1,14 @@
+{
+  "name": "btp-deploy-doctor-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "packages/core",
+    "packages/vscode"
+  ],
+  "scripts": {
+    "build": "npm run build -w packages/core && npm run build -w packages/vscode",
+    "test": "npm run build -w packages/core && npm test -w packages/core",
+    "typecheck": "npm run typecheck -w packages/vscode"
+  }
+}
