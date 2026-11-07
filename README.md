@@ -1,6 +1,7 @@
 # BTP Deploy Doctor
 
 [![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/HavisunTechnologies.btp-deploy-doctor-vscode?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=HavisunTechnologies.btp-deploy-doctor-vscode)
+[![Open VSX](https://img.shields.io/open-vsx/v/HavisunTechnologies/btp-deploy-doctor-vscode?label=Open%20VSX)](https://open-vsx.org/extension/HavisunTechnologies/btp-deploy-doctor-vscode)
 
 Finds SAP BTP / CAP deployment mistakes **before** `cf deploy`, fixes most of them automatically, and explains failed deploy and app logs **after** it. Covers CAP services, Fiori apps in the HTML5 application repository (managed approuter, Work Zone) and multitenant SaaS apps.
 
@@ -13,7 +14,7 @@ Finds SAP BTP / CAP deployment mistakes **before** `cf deploy`, fixes most of th
 ## Install
 
 - **VS Code:** search for "BTP Deploy Doctor" in the Extensions view, or install it from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=HavisunTechnologies.btp-deploy-doctor-vscode).
-- **SAP Business Application Studio:** coming soon through Open VSX. Until then, download the .vsix from the Marketplace page and use "Extensions: Install from VSIX...".
+- **SAP Business Application Studio:** search for "BTP Deploy Doctor" in the Extensions view. BAS installs it from [Open VSX](https://open-vsx.org/extension/HavisunTechnologies/btp-deploy-doctor-vscode).
 
 ## Try it
 
