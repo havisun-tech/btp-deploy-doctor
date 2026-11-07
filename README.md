@@ -1,6 +1,6 @@
 # BTP Deploy Doctor
 
-Finds SAP BTP / CAP deployment mistakes **before** `cf deploy`, and explains failed deploy and app logs **after** it.
+Finds SAP BTP / CAP deployment mistakes **before** `cf deploy`, fixes most of them automatically, and explains failed deploy and app logs **after** it. Covers CAP services, Fiori apps in the HTML5 application repository (managed approuter, Work Zone) and multitenant SaaS apps.
 
 | Package | What it is |
 |---|---|
@@ -14,7 +14,16 @@ npm install
 npm run build
 node packages/core/dist/cli.js check examples/broken-bookshop
 node packages/core/dist/cli.js diagnose examples/broken-bookshop/deploy.log
+node packages/core/dist/cli.js fix --dry-run examples/broken-bookshop
 ```
+
+Examples, each with a matching failed `deploy.log`:
+
+| Folder | What is broken |
+|---|---|
+| `examples/broken-bookshop` | CAP service: bindings, dependencies, auth profiles, build step |
+| `examples/broken-fiori` | Fiori app: artifact names, destinations, sap.cloud.service, packaging |
+| `examples/broken-saas` | Multitenant app: tenant mode, Service Manager, TENANT_HOST_PATTERN, MTX |
 
 ## Development
 

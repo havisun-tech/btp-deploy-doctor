@@ -1,7 +1,9 @@
 import { Project } from './project';
 import { cdsRules } from './rules/cds';
 import { crossRules } from './rules/cross';
+import { fioriRules } from './rules/fiori';
 import { mtaRules } from './rules/mta';
+import { mtxRules } from './rules/mtx';
 import { repoRules } from './rules/repo';
 import { CheckResult, Finding, Severity } from './types';
 
@@ -21,7 +23,7 @@ export function runChecks(root: string): CheckResult {
       location: { file: '.' },
     });
   } else {
-    findings.push(...mtaRules(p), ...cdsRules(p), ...crossRules(p), ...repoRules(p));
+    findings.push(...mtaRules(p), ...cdsRules(p), ...crossRules(p), ...fioriRules(p), ...mtxRules(p), ...repoRules(p));
   }
   findings.sort(
     (a, b) =>

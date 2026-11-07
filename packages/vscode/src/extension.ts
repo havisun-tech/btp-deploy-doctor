@@ -19,7 +19,7 @@ import {
   runChecks,
 } from 'btp-deploy-doctor';
 
-const WATCHED = new Set(['mta.yaml', 'mta.yml', 'package.json', '.cdsrc.json', '.cdsrc-private.json', 'xs-security.json', '.gitignore']);
+const WATCHED = new Set(['mta.yaml', 'mta.yml', 'package.json', '.cdsrc.json', '.cdsrc-private.json', 'xs-security.json', '.gitignore', 'manifest.json', 'xs-app.json', 'ui5.yaml', 'ui5-deploy.yaml']);
 
 const SEVERITY: Record<Finding['severity'], vscode.DiagnosticSeverity> = {
   error: vscode.DiagnosticSeverity.Error,
@@ -48,7 +48,7 @@ export function activate(ctx: vscode.ExtensionContext) {
     vscode.commands.registerCommand('btpDoctor.applyFix', applyFixCommand),
     vscode.commands.registerCommand('btpDoctor.fixAll', fixAllCommand),
     vscode.languages.registerCodeActionsProvider(
-      { scheme: 'file', pattern: '**/{mta.yaml,mta.yml,package.json,.cdsrc.json,.gitignore}' },
+      { scheme: 'file', pattern: '**/{mta.yaml,mta.yml,package.json,.cdsrc.json,.gitignore,manifest.json,xs-app.json,ui5-deploy.yaml,xs-security.json}' },
       { provideCodeActions },
       { providedCodeActionKinds: [vscode.CodeActionKind.QuickFix] },
     ),
@@ -187,14 +187,14 @@ function provideCodeActions(doc: vscode.TextDocument, _range: vscode.Range, ctx:
     fixes.forEach((fix, idx) => {
       const action = new vscode.CodeAction(fix.title, vscode.CodeActionKind.QuickFix);
       action.diagnostics = [d];
-      action.isPreferred = fixes.length === 1;
+      action.isPreferred = fixes.length === 1 && !fix.requiresReview;
       action.command = { command: 'btpDoctor.applyFix', title: fix.title, arguments: [entry!.root, d.code, title, idx] };
       actions.push(action);
     });
     if (entry && fixes.length) roots.add(entry.root);
   }
   for (const root of roots) {
-    const count = [...findingsByKey.values()].filter((e) => e.root === root && e.finding.fixes?.length === 1).length;
+    const count = autoFixable([...findingsByKey.values()].filter((e) => e.root === root).map((e) => e.finding)).length;
     if (count > 1) {
       const action = new vscode.CodeAction(`Fix all ${count} auto-fixable BTP Doctor problems`, vscode.CodeActionKind.QuickFix);
       action.command = { command: 'btpDoctor.fixAll', title: action.title, arguments: [root] };

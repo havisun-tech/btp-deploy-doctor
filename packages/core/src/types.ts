@@ -19,6 +19,8 @@ export interface Fix {
   changes: FileChange[];
   /** Something the user must do afterwards, e.g. run npm install. */
   followUp?: string;
+  /** Skipped by fix-all; offered only as an individual quick fix. */
+  requiresReview?: boolean;
 }
 
 export interface Finding {

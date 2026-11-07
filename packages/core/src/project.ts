@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { Document, LineCounter, parseDocument } from 'yaml';
-import { resolveProfile } from './cds-config';
+import { resolveProfiles } from './cds-config';
 import { deepMerge, isPlainObject, lineAt } from './util';
 
 export interface ParseError {
@@ -40,6 +40,23 @@ export class Project {
     this.packageJson = this.readJson('package.json');
     this.cdsrc = this.readJson('.cdsrc.json');
     this.cdsrcPrivate = this.readJson('.cdsrc-private.json');
+  }
+
+  private jsonCache = new Map<string, JsonFile | undefined>();
+  private yamlCache = new Map<string, YamlFile | undefined>();
+
+  /** Any JSON file in the project (cached). */
+  json(rel: string): JsonFile | undefined {
+    const key = rel.replace(/^\.\//, '');
+    if (!this.jsonCache.has(key)) this.jsonCache.set(key, this.readJson(key));
+    return this.jsonCache.get(key);
+  }
+
+  /** Any YAML file in the project (cached). */
+  yaml(rel: string): YamlFile | undefined {
+    const key = rel.replace(/^\.\//, '');
+    if (!this.yamlCache.has(key)) this.yamlCache.set(key, this.exists(key) ? this.readYaml(key) : undefined);
+    return this.yamlCache.get(key);
   }
 
   abs(rel: string): string {
@@ -96,8 +113,15 @@ export class Project {
     return deepMerge(merged, this.packageJson?.data.cds ?? {});
   }
 
+  /** Extra profiles the project always activates (cds.profile / cds.profiles). */
+  get cdsProfiles(): string[] {
+    const raw = this.cdsRaw;
+    const list = Array.isArray(raw.profiles) ? raw.profiles : typeof raw.profile === 'string' ? [raw.profile] : Array.isArray(raw.profile) ? raw.profile : [];
+    return list.filter((x: unknown): x is string => typeof x === 'string');
+  }
+
   cdsFor(profile: string): any {
-    return resolveProfile(this.cdsRaw, profile);
+    return resolveProfiles(this.cdsRaw, [...this.cdsProfiles, profile]);
   }
 
   /** Where CAP config lives, for pointing findings at it. */
@@ -109,13 +133,13 @@ export class Project {
     return { file: 'package.json', line: 1 };
   }
 
-  /** 1-based line of a node in mta.yaml, e.g. ['modules', 0, 'path']. */
-  yamlLine(nodePath: (string | number)[]): number | undefined {
-    if (!this.mta) return undefined;
-    const node: any = this.mta.doc.getIn(nodePath, true);
+  /** 1-based line of a node in mta.yaml (or another YAML file), e.g. ['modules', 0, 'path']. */
+  yamlLine(nodePath: (string | number)[], file: YamlFile | undefined = this.mta): number | undefined {
+    if (!file) return undefined;
+    const node: any = file.doc.getIn(nodePath, true);
     const range: number[] | undefined = node?.range;
     if (!range) return undefined;
-    return this.mta.lineCounter.linePos(range[0]).line;
+    return file.lineCounter.linePos(range[0]).line;
   }
 
   /** Approximate 1-based line of a (nested) key in a JSON file. */

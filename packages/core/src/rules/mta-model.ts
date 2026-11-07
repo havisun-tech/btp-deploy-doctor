@@ -5,6 +5,7 @@ export interface MtaRequire {
   name: string;
   idx: number;
   properties: Record<string, any>;
+  parameters: Record<string, any>;
 }
 
 export interface MtaModule {
@@ -16,6 +17,7 @@ export interface MtaModule {
   provides: string[];
   parameters: Record<string, any>;
   properties: Record<string, any>;
+  buildParameters: Record<string, any>;
 }
 
 export interface MtaResource {
@@ -38,12 +40,14 @@ export function mtaModules(p: Project): MtaModule[] {
       name: str(r?.name) ?? '',
       idx: ridx,
       properties: obj(r?.properties),
+      parameters: obj(r?.parameters),
     })),
     provides: asArray(m?.provides)
       .map((pr: any) => str(pr?.name))
       .filter((n): n is string => !!n),
     parameters: obj(m?.parameters),
     properties: obj(m?.properties),
+    buildParameters: obj(m?.['build-parameters']),
   }));
 }
 
@@ -82,3 +86,16 @@ export const isHdbDeployer = (m: MtaModule) => m.type === 'hdb' || m.type === 'c
 export const isApprouter = (m: MtaModule) => m.type === 'approuter.nodejs';
 export const isCapService = (m: MtaModule) =>
   (m.type === 'nodejs' || m.type === 'java') && (/(^|\/)srv(\/|$)/.test(m.path ?? '') || m.name.endsWith('-srv'));
+
+/** The Cloud Foundry service instance name a resource creates. */
+export const instanceName = (r: MtaResource) => str(r.parameters['service-name']) ?? r.name;
+
+export const isRepoHost = (r: MtaResource) => service(r) === 'html5-apps-repo' && r.parameters['service-plan'] === 'app-host';
+export const isServiceManager = (r: MtaResource) => service(r) === 'service-manager';
+export const isSaasRegistry = (r: MtaResource) => service(r) === 'saas-registry';
+export const isHtml5App = (m: MtaModule) => m.type === 'html5';
+export const isAppContent = (m: MtaModule) => m.type === 'com.sap.application.content';
+export const isMtxSidecar = (m: MtaModule) => (m.type === 'nodejs' || m.type === 'java') && /(^|\/)mtx(\/|$)/.test(m.path ?? '');
+
+/** Commands of a module's custom builder. */
+export const moduleCommands = (m: MtaModule): string[] => asArray(m.buildParameters.commands).filter((c): c is string => typeof c === 'string');

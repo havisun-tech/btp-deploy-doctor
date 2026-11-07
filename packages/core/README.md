@@ -22,7 +22,9 @@ After fixes that change package.json, run `npm install` so package-lock.json mat
 
 ## Rules
 
-Rules marked ✔ have an automatic fix (sometimes only when the right value is unambiguous).
+Rules marked ✔ have an automatic fix (sometimes only when the right value is unambiguous). "review" fixes are offered as quick fixes but skipped by `fix`, because they can affect local development.
+
+UI rules apply to Fiori / UI5 apps deployed as html5 modules to the HTML5 application repository (managed approuter, SAP Build Work Zone). MT rules apply when `cds.requires.multitenancy` is on in production.
 
 | ID | Severity | Checks | Fix |
 |---|---|---|---|
@@ -49,5 +51,26 @@ Rules marked ✔ have an automatic fix (sometimes only when the right value is u
 | X001 | error | CAP service module is bound to the auth service it is configured for | ✔ |
 | X002 | error | Destinations used by CAP have the destination service bound | ✔ |
 | REPO001 | warning | Credential files are git-ignored | ✔ |
+| UI001 | error | Every html5 module is packaged by a content module | ✔ |
+| UI002 | error | Artifact name in mta.yaml matches the ui5-task-zipper archiveName | ✔ |
+| UI003 | error | Content module uploads to an html5-apps-repo app-host (content-target) | ✔ |
+| UI004 | error | Build scripts called from mta.yaml exist in the app's package.json | ✔ |
+| UI005 | error | The UI5 build produces a zip (zipper task configured and installed) | ✔ |
+| UI006 | warning | xs-app.json exists and is packaged into the zip | ✔ |
+| UI007 | error/warning | xs-app.json is valid, route patterns compile, destinations exist | ✔ |
+| UI008 | warning/error | manifest.json sap.cloud.service is set and matches mta.yaml | ✔ |
+| UI009 | warning | Data source URIs are relative (managed approuter / Work Zone) | review |
+| UI010 | warning | Destination service has HTML5Runtime_enabled | ✔ |
+| UI011 | error | Destination content points at real instances and service keys | ✔ |
+| UI012 | warning | html5 modules are build-only (supported-platforms: []) | ✔ |
+| MT001 | error | Multitenancy has @sap/cds-mtxs at runtime | ✔ |
+| MT002 | error | XSUAA tenant-mode is shared | ✔ |
+| MT003 | error | A Service Manager (container) resource exists | ✔ |
+| MT004 | error | A SaaS registry exists and has an onSubscription URL |  |
+| MT005 | error | The with-mtx-sidecar profile has a sidecar module |  |
+| MT006 | error | The approuter has TENANT_HOST_PATTERN | ✔ |
+| MT007 | error | Service and sidecar modules are bound to Service Manager | ✔ |
+| MT008 | error | SaaS registry and XSUAA use the same xsappname | ✔ |
+| MT009 | warning | No static HDI deployer in a multitenant app |  |
 
 The log analyzer knows the failure signatures in `src/logs/patterns.ts`.

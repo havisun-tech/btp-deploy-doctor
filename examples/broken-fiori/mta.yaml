@@ -1,0 +1,116 @@
+_schema-version: '3.1'
+ID: bookshop
+version: 1.0.0
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npx cds build --production
+modules:
+  - name: bookshop-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      memory: 256M
+    requires:
+      - name: bookshop-db
+      - name: bookshop-auth
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
+  - name: bookshop-db-deployer
+    type: hdb
+    path: gen/db
+    requires:
+      - name: bookshop-db
+  - name: bookshop-app-content
+    type: com.sap.application.content
+    path: .
+    requires:
+      - name: bookshop-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: resources
+      requires:
+        - artifacts:
+            - comsapbookshopbrowse.zip
+          name: comsapbookshopbrowse
+          target-path: resources/
+  - name: comsapbookshopbrowse
+    type: html5
+    path: app/browse
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm ci
+        - npm run build:cf
+  - name: bookshop-destination-content
+    type: com.sap.application.content
+    requires:
+      - name: bookshop-destination
+        parameters:
+          content-target: true
+      - name: bookshop-repo-host
+        parameters:
+          service-key:
+            name: bookshop-repo-host-key
+      - name: bookshop-auth
+        parameters:
+          service-key:
+            name: bookshop-auth-key
+    parameters:
+      content:
+        instance:
+          destinations:
+            - Name: bookshop_html_repo_host
+              ServiceInstanceName: bookshop-repo-host
+              ServiceKeyName: bookshop-repo-host-key
+              sap.cloud.service: bookshop
+            - Authentication: OAuth2UserTokenExchange
+              Name: bookshop_uaa
+              ServiceInstanceName: bookshop-xsuaa-service
+              ServiceKeyName: bookshop-auth-key
+              sap.cloud.service: bookshop
+          existing_destinations_policy: ignore
+    build-parameters:
+      no-source: true
+resources:
+  - name: bookshop-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-name: bookshop-html5-app-host-service
+      service-plan: app-host
+  - name: bookshop-destination
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-plan: lite
+      config:
+        init_data:
+          instance:
+            destinations:
+              - Name: srv-api
+                Type: HTTP
+                URL: ~{srv-api/srv-url}
+                ProxyType: Internet
+                Authentication: NoAuthentication
+                HTML5.ForwardAuthToken: true
+            existing_destinations_policy: update
+    requires:
+      - name: srv-api
+  - name: bookshop-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+  - name: bookshop-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-name: bookshop-xsuaa-service
+      service-plan: application
+      path: ./xs-security.json

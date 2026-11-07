@@ -36,7 +36,7 @@ export interface AppliedFix {
 const findingKey = (f: Finding) => `${f.ruleId}|${f.title}|${f.message}`;
 
 /** Findings that fix-all would handle: exactly one fix, so no choice is needed. */
-export const autoFixable = (findings: Finding[]) => findings.filter((f) => f.fixes?.length === 1);
+export const autoFixable = (findings: Finding[]) => findings.filter((f) => f.fixes?.length === 1 && !f.fixes[0].requiresReview);
 
 /**
  * Applies every unambiguous fix, one at a time, re-checking after each so that

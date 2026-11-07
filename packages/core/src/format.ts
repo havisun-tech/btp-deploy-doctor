@@ -1,5 +1,5 @@
 import { changedRegion } from './fix/edit';
-import { AppliedFix } from './fix/apply';
+import { AppliedFix, autoFixable } from './fix/apply';
 import { DiagnoseResult } from './logs/analyze';
 import { CheckResult, Finding, Fix, Severity } from './types';
 
@@ -25,14 +25,14 @@ export function formatCheck(r: CheckResult, opts: FormatOptions = {}): string {
     out.push(`${icon[f.severity]}  ${c.bold(f.title)}  ${c.dim(`${f.ruleId} ${where}`)}`);
     out.push(`${pad}${indent(f.message, pad)}`);
     if (f.fix) out.push(`${pad}${c.green('Fix:')} ${indent(f.fix, pad + '     ')}`);
-    for (const x of f.fixes ?? []) out.push(`${pad}${c.cyan('Auto-fix:')} ${x.title}`);
+    for (const x of f.fixes ?? []) out.push(`${pad}${c.cyan(x.requiresReview ? 'Quick fix (review first):' : 'Auto-fix:')} ${x.title}`);
     out.push('');
   }
   const { error, warning, info } = r.summary;
   if (!r.findings.length) out.push(c.green('No problems found.'));
   else {
     out.push(`${plural(error, 'error')}, ${plural(warning, 'warning')}, ${info} info`);
-    const auto = r.findings.filter((f) => f.fixes?.length === 1).length;
+    const auto = autoFixable(r.findings).length;
     if (auto) out.push(c.dim(`${auto} can be fixed automatically: btp-doctor fix${r.root === process.cwd() ? '' : ` ${r.root}`}`));
   }
   return out.join('\n');

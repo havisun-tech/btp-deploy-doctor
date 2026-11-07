@@ -18,6 +18,21 @@ export function resolveProfile(cfg: unknown, profile: string): any {
   return out;
 }
 
+/** Resolves several profiles in order; later ones win. */
+export function resolveProfiles(cfg: unknown, profiles: string[]): any {
+  if (!isPlainObject(cfg)) return cfg;
+  const out: Record<string, any> = {};
+  for (const [k, v] of Object.entries(cfg)) {
+    if (PROFILE_KEY.test(k)) continue;
+    out[k] = resolveProfiles(v, profiles);
+  }
+  for (const profile of profiles) {
+    const block = cfg[`[${profile}]`];
+    if (isPlainObject(block)) deepMerge(out, resolveProfiles(block, profiles));
+  }
+  return out;
+}
+
 /** Kind of a `cds.requires.<name>` entry, handling the string shorthand (`"db": "hana"`). */
 export function requiredKind(resolved: any, name: string): string | undefined {
   const r = resolved?.requires?.[name];

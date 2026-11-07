@@ -1,0 +1,3 @@
+   2026-11-07T11:02:13.00+0000 [APP/PROC/WEB/0] OUT [cds] - Subscription failed: onSubscription callback returned status code 500
+   2026-11-07T11:02:13.10+0000 [APP/PROC/WEB/0] ERR Error: Cannot find module '@sap/cds-mtxs'
+   2026-11-07T11:05:40.00+0000 [RTR/0] OUT acme-saas.cfapps.eu10.hana.ondemand.com - Host acme-saas.cfapps.eu10.hana.ondemand.com does not match TENANT_HOST_PATTERN

@@ -82,13 +82,20 @@ function yamlOptions(text: string) {
 /** Edits mta.yaml through the YAML document model. Return false from `mutate` to cancel. */
 export function editYaml(p: Project, mutate: (doc: Document) => void | false): FileChange | undefined {
   if (!p.mta || p.mta.errors.length) return undefined;
-  const original = p.mta.text;
+  return editYamlFile(p, p.mta.rel, mutate);
+}
+
+/** Edits any YAML file, changing only the lines the edit touches. */
+export function editYamlFile(p: Project, rel: string, mutate: (doc: Document) => void | false): FileChange | undefined {
+  const original = p.readText(rel);
+  if (original === undefined) return undefined;
+  if (parseDocument(original).errors.length) return undefined;
   const opts = yamlOptions(original);
   const doc = parseDocument(original);
   const baseline = doc.toString(opts);
   if (mutate(doc) === false) return undefined;
   const after = applyLineDiff(original, baseline, doc.toString(opts));
-  return after === original ? undefined : { file: p.mta.rel, before: original, after };
+  return after === original ? undefined : { file: rel, before: original, after };
 }
 
 /** One JSON edit. `value: undefined` removes the property. `sorted` inserts new keys alphabetically. */
@@ -158,10 +165,11 @@ export function setScalar(doc: Document, path: (string | number)[], value: strin
   else doc.setIn(path, value);
 }
 
-export function addRequire(doc: Document, modIdx: number, name: string) {
+export function addRequire(doc: Document, modIdx: number, name: string, parameters?: Record<string, unknown>) {
+  const entry = parameters ? { name, parameters } : { name };
   const seq = doc.getIn(['modules', modIdx, 'requires']);
-  if (isSeq(seq)) seq.add(doc.createNode({ name }));
-  else doc.setIn(['modules', modIdx, 'requires'], doc.createNode([{ name }]));
+  if (isSeq(seq)) seq.add(doc.createNode(entry));
+  else doc.setIn(['modules', modIdx, 'requires'], doc.createNode([entry]));
 }
 
 export function addResource(doc: Document, resource: Record<string, unknown>) {

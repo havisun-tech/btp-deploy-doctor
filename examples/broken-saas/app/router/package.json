@@ -1,0 +1,6 @@
+{
+  "name": "approuter",
+  "dependencies": {
+    "@sap/approuter": "^20"
+  }
+}

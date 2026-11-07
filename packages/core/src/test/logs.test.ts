@@ -32,6 +32,13 @@ const SAMPLES: Record<string, string> = {
   'port-in-use': 'Error: listen EADDRINUSE: address already in use :::4004',
   'broker-error': 'Service broker error: Invalid scope reference in role template',
   'hdi-deploy-failed': 'Deployment to container BOOKSHOP_HDI failed - error: Error executing make',
+  'ui5-task-missing': "Error: Cannot find module 'ui5-task-zipper'",
+  'mbt-artifact-missing': 'ERROR could not copy build artifacts: the "comsapbookshopbrowse.zip" artifact was not found',
+  'html5-xs-app-missing': 'Error: xs-app.json file is missing in application comsapbookshopbrowse',
+  'html5-app-not-found': 'Application comsapbookshopbrowse-1.0.0 not found in HTML5 Application Repository',
+  'mtx-subscription-failed': 'Subscription failed: onSubscription callback returned status code 500',
+  'mtx-tenant-unknown': "Error: Tenant 'a1b2c3d4-0000-1111-2222-333344445555' is not subscribed",
+  'tenant-host-pattern': 'Host acme-bookshop.cfapps.eu10.hana.ondemand.com does not match TENANT_HOST_PATTERN',
   'app-crashed': 'Error starting application "bookshop-srv": Some instances have crashed.',
 };
 
@@ -73,6 +80,11 @@ test('lists unexplained error lines', () => {
 test('generic patterns yield to specific ones on the same line', () => {
   const r = analyzeLog('Error: com.sap.hana.di.table: Could not find the "com.sap.hana.di.cds" build plugin');
   assert.deepEqual(r.matches.map((m) => m.patternId), ['hdi-build-plugin']);
+});
+
+test('ui5 tasks are not reported as runtime modules', () => {
+  const ids = analyzeLog("Error: Cannot find module 'ui5-task-zipper'").matches.map((m) => m.patternId);
+  assert.ok(!ids.includes('module-not-found'));
 });
 
 test('clean log has no matches', () => {

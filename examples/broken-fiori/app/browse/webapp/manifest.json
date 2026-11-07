@@ -1,0 +1,11 @@
+{
+  "sap.app": {
+    "id": "com.sap.bookshop.browse",
+    "dataSources": {
+      "mainService": {
+        "uri": "/odata/v4/catalog/",
+        "type": "OData"
+      }
+    }
+  }
+}

@@ -1,0 +1,66 @@
+_schema-version: '3.1'
+ID: saas
+version: 1.0.0
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npx cds build --production
+modules:
+  - name: saas-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      memory: 256M
+    requires:
+      - name: saas-db
+      - name: saas-auth
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
+  - name: saas-mtx
+    type: nodejs
+    path: gen/mtx/sidecar
+    requires:
+      - name: saas-auth
+    provides:
+      - name: mtx-api
+        properties:
+          mtx-url: ${default-url}
+  - name: saas
+    type: approuter.nodejs
+    path: app/router
+    requires:
+      - name: srv-api
+      - name: mtx-api
+      - name: saas-auth
+resources:
+  - name: saas-db
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: service-manager
+      service-plan: container
+  - name: saas-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: saas-${org}-${space}
+        tenant-mode: dedicated
+  - name: saas-registry
+    type: org.cloudfoundry.managed-service
+    requires:
+      - name: mtx-api
+    parameters:
+      service: saas-registry
+      service-plan: application
+      config:
+        xsappname: saas
+        appName: saas-${org}-${space}
+        displayName: saas
+        appUrls:
+          getDependencies: ~{mtx-api/mtx-url}/-/cds/saas-provisioning/dependencies
+          onSubscription: ~{mtx-api/mtx-url}/-/cds/saas-provisioning/tenant/{tenantId}

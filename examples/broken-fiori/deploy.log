@@ -1,0 +1,6 @@
+Building module "comsapbookshopbrowse"...
+info builder:builder Build succeeded in 2.1 s
+Building module "bookshop-app-content"...
+ERROR could not copy build artifacts: the "comsapbookshopbrowse.zip" artifact was not found
+make: *** [Makefile_20261107.mta:53: bookshop-app-content] Error 1
+Error: could not build the MTA project: could not execute the "make -f Makefile_20261107.mta" command: exit status 2

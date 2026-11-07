@@ -1,0 +1,26 @@
+{
+  "name": "broken-saas",
+  "version": "1.0.0",
+  "dependencies": {
+    "@sap/cds": "^9",
+    "@cap-js/hana": "^2",
+    "@sap/xssec": "^4",
+    "express": "^4"
+  },
+  "devDependencies": {
+    "@sap/cds-dk": "^9"
+  },
+  "engines": {
+    "node": "^20"
+  },
+  "cds": {
+    "profile": "with-mtx-sidecar",
+    "requires": {
+      "[production]": {
+        "multitenancy": true,
+        "db": "hana",
+        "auth": "xsuaa"
+      }
+    }
+  }
+}
