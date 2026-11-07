@@ -6,6 +6,7 @@ Finds SAP BTP / CAP deployment mistakes **before** `cf deploy`, fixes most of th
 |---|---|
 | [`packages/core`](packages/core) | `btp-doctor` CLI and library: project checks, log analyzer, cf log fetching |
 | [`packages/vscode`](packages/vscode) | VS Code extension. Also runs in SAP Business Application Studio (BAS) |
+| [`packages/mcp`](packages/mcp) | MCP server, so AI assistants such as Claude Code, Copilot and Cursor can check, fix and diagnose |
 
 ## Try it
 
@@ -24,6 +25,15 @@ Examples, each with a matching failed `deploy.log`:
 | `examples/broken-bookshop` | CAP service: bindings, dependencies, auth profiles, build step |
 | `examples/broken-fiori` | Fiori app: artifact names, destinations, sap.cloud.service, packaging |
 | `examples/broken-saas` | Multitenant app: tenant mode, Service Manager, TENANT_HOST_PATTERN, MTX |
+
+To try the MCP server in Claude Code, open this folder and approve the `btp-doctor` server from `.mcp.json`. Then ask, for example, "check examples/broken-fiori and fix what's safe". Setup for other clients is in [packages/mcp/README.md](packages/mcp/README.md).
+
+## Tested on public projects
+
+The checks run without false errors on 20 MTA projects from public SAP samples, including
+SAP-samples/cap-sflight, btp-cap-multitenant-saas, btp-cap-genai-rag, fiori-tools-samples,
+btp-user-management-microservice and liteinventorymanagement. Patterns from those projects
+are kept as regression tests in `packages/core/src/test/real-world.test.ts`.
 
 ## Development
 

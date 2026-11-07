@@ -3,6 +3,19 @@
   "version": "0.1.0",
   "description": "Finds and explains SAP BTP / CAP deployment problems before and after cf deploy.",
   "license": "Apache-2.0",
+  "author": {
+    "name": "Havisun",
+    "url": "https://www.havisun.com"
+  },
+  "homepage": "https://github.com/havisun-tech/btp-deploy-doctor#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/havisun-tech/btp-deploy-doctor.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/havisun-tech/btp-deploy-doctor/issues"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {

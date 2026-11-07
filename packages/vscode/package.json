@@ -3,8 +3,27 @@
   "displayName": "BTP Deploy Doctor",
   "description": "Catches SAP BTP / CAP deployment mistakes in mta.yaml and package.json, fixes them in one click, and explains failed cf deploy logs.",
   "version": "0.1.0",
-  "publisher": "btp-deploy-doctor",
+  "publisher": "havisun-tech",
   "license": "Apache-2.0",
+  "author": {
+    "name": "Havisun",
+    "url": "https://www.havisun.com"
+  },
+  "homepage": "https://github.com/havisun-tech/btp-deploy-doctor#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/havisun-tech/btp-deploy-doctor.git",
+    "directory": "packages/vscode"
+  },
+  "bugs": {
+    "url": "https://github.com/havisun-tech/btp-deploy-doctor/issues"
+  },
+  "icon": "images/icon.png",
+  "preview": true,
+  "galleryBanner": {
+    "color": "#0a3d91",
+    "theme": "dark"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
