@@ -1,0 +1,53 @@
+{
+  "name": "btp-deploy-doctor-mcp",
+  "version": "0.1.0",
+  "description": "MCP server that lets AI assistants check, fix and diagnose SAP BTP / CAP deployments.",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Havisun",
+    "url": "https://www.havisun.com"
+  },
+  "homepage": "https://github.com/havisun-tech/btp-deploy-doctor#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/havisun-tech/btp-deploy-doctor.git",
+    "directory": "packages/mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/havisun-tech/btp-deploy-doctor/issues"
+  },
+  "main": "dist/server.js",
+  "types": "dist/server.d.ts",
+  "bin": {
+    "btp-doctor-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "!dist/test"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && chmod +x dist/index.js",
+    "test": "node --test dist/test/"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "btp-deploy-doctor": "^0.1.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.0"
+  },
+  "keywords": [
+    "sap",
+    "btp",
+    "cap",
+    "mcp",
+    "model-context-protocol",
+    "cloud-foundry",
+    "mta"
+  ]
+}
