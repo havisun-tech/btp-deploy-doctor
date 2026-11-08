@@ -1,4 +1,4 @@
-import { FormattingOptions, ParseError, applyEdits, modify, parse as parseJsonc } from 'jsonc-parser';
+import { FormattingOptions, ParseError, applyEdits, findNodeAtLocation, modify, parse as parseJsonc, parseTree } from 'jsonc-parser';
 import { Document, isMap, isScalar, isSeq, parseDocument } from 'yaml';
 import { Project } from '../project';
 import { FileChange } from '../types';
@@ -121,6 +121,13 @@ export function editJson(p: Project, rel: string, ops: JsonOp[]): FileChange | u
   let text = original;
   for (const op of ops) {
     const key = op.path[op.path.length - 1];
+    if (key === -1) {
+      const appended = appendToArray(text, op.path.slice(0, -1), op.value, indent);
+      if (appended !== undefined) {
+        text = appended;
+        continue;
+      }
+    }
     const getInsertionIndex =
       op.sorted && typeof key === 'string'
         ? (props: string[]) => {
@@ -131,6 +138,47 @@ export function editJson(p: Project, rel: string, ops: JsonOp[]): FileChange | u
     text = applyEdits(text, modify(text, op.path, op.value, { formattingOptions, getInsertionIndex }));
   }
   return text === original ? undefined : { file: rel, before: original, after: text };
+}
+
+/** One-line JSON with spaces, the way people write short entries by hand: { "a": 1, "b": ["x"] } */
+function inlineJson(v: unknown): string {
+  if (Array.isArray(v)) return `[${v.map(inlineJson).join(', ')}]`;
+  if (v && typeof v === 'object') return `{ ${Object.entries(v).map(([k, x]) => `${JSON.stringify(k)}: ${inlineJson(x)}`).join(', ')} }`;
+  return JSON.stringify(v);
+}
+
+/** Multi-line JSON; arrays of plain values stay on one line when the file writes them that way. */
+function blockJson(v: unknown, unit: string, pad: string, inlineLists: boolean): string {
+  if (Array.isArray(v)) {
+    if (!v.length || (inlineLists && v.every((x) => typeof x !== 'object' || x === null))) return inlineJson(v);
+    return `[\n${v.map((x) => pad + unit + blockJson(x, unit, pad + unit, inlineLists)).join(',\n')}\n${pad}]`;
+  }
+  if (v && typeof v === 'object') {
+    const entries = Object.entries(v);
+    if (!entries.length) return '{}';
+    return `{\n${entries.map(([k, x]) => `${pad}${unit}${JSON.stringify(k)}: ${blockJson(x, unit, pad + unit, inlineLists)}`).join(',\n')}\n${pad}}`;
+  }
+  return JSON.stringify(v);
+}
+
+/**
+ * Appends to a non-empty JSON array by inserting text after its last item, in the
+ * style of that item (one line or block), so the existing items stay untouched.
+ */
+function appendToArray(text: string, path: (string | number)[], value: unknown, unit: string): string | undefined {
+  const node = findNodeAtLocation(parseTree(text)!, path);
+  const last = node?.type === 'array' ? node.children?.[node.children.length - 1] : undefined;
+  if (!node || !last) return undefined;
+  const end = last.offset + last.length;
+  const lastText = text.slice(last.offset, end);
+  const sameLine = !text.slice(node.offset, last.offset).includes('\n');
+  if (sameLine) return `${text.slice(0, end)}, ${inlineJson(value)}${text.slice(end)}`;
+  const lineStart = text.lastIndexOf('\n', last.offset) + 1;
+  const pad = /^[ \t]*/.exec(text.slice(lineStart))![0];
+  const inlineLists = /\[\s*"[^"\n]*"(?:\s*,\s*"[^"\n]*")*\s*\]/.test(text);
+  const eol = text.includes('\r\n') ? '\r\n' : '\n';
+  const item = lastText.includes('\n') ? blockJson(value, unit, pad, inlineLists).replace(/\n/g, eol) : inlineJson(value);
+  return `${text.slice(0, end)},${eol}${pad}${item}${text.slice(end)}`;
 }
 
 /** Ops that set a dependency, keeping the section sorted as npm does. */

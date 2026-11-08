@@ -1,0 +1,20 @@
+{
+  "name": "broken-auth",
+  "version": "1.0.0",
+  "dependencies": {
+    "@sap/cds": "^9",
+    "@cap-js/hana": "^2",
+    "@sap/xssec": "^4",
+    "express": "^4"
+  },
+  "devDependencies": {
+    "@sap/cds-dk": "^9",
+    "@cap-js/sqlite": "^2"
+  },
+  "engines": { "node": "^20" },
+  "cds": {
+    "requires": {
+      "[production]": { "db": "hana", "auth": "xsuaa" }
+    }
+  }
+}

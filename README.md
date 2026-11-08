@@ -1,11 +1,11 @@
-# BTP Deploy Doctor
+# Deploy Doctor for SAP BTP
 
 [![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/HavisunTechnologies.btp-deploy-doctor-vscode?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=HavisunTechnologies.btp-deploy-doctor-vscode)
 [![Open VSX](https://img.shields.io/open-vsx/v/HavisunTechnologies/btp-deploy-doctor-vscode?label=Open%20VSX)](https://open-vsx.org/extension/HavisunTechnologies/btp-deploy-doctor-vscode)
 
-Finds SAP BTP / CAP deployment mistakes **before** `cf deploy`, fixes most of them automatically, and explains failed deploy and app logs **after** it. Covers CAP services, Fiori apps in the HTML5 application repository (managed approuter, Work Zone) and multitenant SaaS apps.
+Finds SAP BTP / CAP deployment mistakes **before** `cf deploy`, fixes most of them automatically, and explains failed deploy and app logs **after** it. Covers CAP services, roles and login (XSUAA), Fiori apps in the HTML5 application repository (managed approuter, Work Zone) and multitenant SaaS apps.
 
-![BTP Deploy Doctor finds deployment problems, fixes them and explains a failed deploy log](media/btp-deploy-doctor-demo.gif)
+![Deploy Doctor for SAP BTP finds deployment problems, fixes them and explains a failed deploy log](media/btp-deploy-doctor-demo.gif)
 
 | Package | What it is |
 |---|---|
@@ -15,8 +15,8 @@ Finds SAP BTP / CAP deployment mistakes **before** `cf deploy`, fixes most of th
 
 ## Install
 
-- **VS Code:** search for "BTP Deploy Doctor" in the Extensions view, or install it from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=HavisunTechnologies.btp-deploy-doctor-vscode).
-- **SAP Business Application Studio:** search for "BTP Deploy Doctor" in the Extensions view. BAS installs it from [Open VSX](https://open-vsx.org/extension/HavisunTechnologies/btp-deploy-doctor-vscode).
+- **VS Code:** search for "Deploy Doctor" in the Extensions view, or install it from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=HavisunTechnologies.btp-deploy-doctor-vscode).
+- **SAP Business Application Studio:** search for "Deploy Doctor" in the Extensions view. BAS installs it from [Open VSX](https://open-vsx.org/extension/HavisunTechnologies/btp-deploy-doctor-vscode).
 
 ## Try it
 
@@ -35,6 +35,7 @@ Examples, each with a matching failed `deploy.log`:
 | `examples/broken-bookshop` | CAP service: bindings, dependencies, auth profiles, build step |
 | `examples/broken-fiori` | Fiori app: artifact names, destinations, sap.cloud.service, packaging |
 | `examples/broken-saas` | Multitenant app: tenant mode, Service Manager, TENANT_HOST_PATTERN, MTX |
+| `examples/broken-auth` | Roles and login: roles missing from xs-security.json, bad references, approuter binding, token forwarding, 401/403 logs |
 
 To try the MCP server in Claude Code, open this folder and approve the `btp-doctor` server from `.mcp.json`. Then ask, for example, "check examples/broken-fiori and fix what's safe". Setup for other clients is in [packages/mcp/README.md](packages/mcp/README.md).
 
@@ -59,3 +60,7 @@ To run the extension from source, open this folder in VS Code and press F5 (uses
 
 - **Static check:** add it to the matching file in `packages/core/src/rules/` with a new rule ID, and a test in `src/test/check.test.ts` that breaks the clean fixture.
 - **Log pattern:** add it to `packages/core/src/logs/patterns.ts` and a sample line to `src/test/logs.test.ts`. The test suite fails if a pattern has no sample.
+
+## Trademarks
+
+Not affiliated with or endorsed by SAP SE. SAP, SAP BTP, SAP Business Application Studio and SAP Fiori are trademarks or registered trademarks of SAP SE in Germany and other countries.

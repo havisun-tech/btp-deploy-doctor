@@ -1,8 +1,8 @@
 {
   "name": "btp-deploy-doctor-vscode",
-  "displayName": "BTP Deploy Doctor",
-  "description": "Catches SAP BTP / CAP deployment mistakes in mta.yaml and package.json, fixes them in one click, and explains failed cf deploy logs.",
-  "version": "0.1.0",
+  "displayName": "Deploy Doctor for SAP BTP",
+  "description": "Catches SAP BTP / CAP deployment mistakes in mta.yaml, package.json, xs-security.json and Fiori apps, fixes them in one click, and explains failed cf deploy logs and 401/403 errors.",
+  "version": "0.2.0",
   "publisher": "HavisunTechnologies",
   "license": "Apache-2.0",
   "author": {
@@ -36,7 +36,11 @@
     "btp",
     "cap",
     "cloud foundry",
-    "mta"
+    "mta",
+    "fiori",
+    "deploy doctor",
+    "xsuaa",
+    "xs-security"
   ],
   "main": "./dist/extension.js",
   "activationEvents": [
@@ -98,12 +102,12 @@
       ]
     },
     "configuration": {
-      "title": "BTP Deploy Doctor",
+      "title": "Deploy Doctor for SAP BTP",
       "properties": {
         "btpDoctor.checkOnSave": {
           "type": "boolean",
           "default": true,
-          "description": "Re-check the project when mta.yaml, package.json, .cdsrc.json or xs-security.json is saved."
+          "description": "Re-check the project when mta.yaml, package.json, .cdsrc.json, xs-security.json, a .cds file or another checked file is saved."
         },
         "btpDoctor.cfPath": {
           "type": "string",

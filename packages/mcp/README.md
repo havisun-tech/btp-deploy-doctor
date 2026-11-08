@@ -1,4 +1,4 @@
-# BTP Deploy Doctor MCP server
+# Deploy Doctor MCP server
 
 An [MCP](https://modelcontextprotocol.io) server that lets AI assistants check, fix and diagnose SAP BTP Cloud Foundry deployments. It covers CAP, MTA, Fiori apps and multitenant (MTX/SaaS) apps.
 

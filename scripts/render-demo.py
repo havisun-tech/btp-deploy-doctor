@@ -1,4 +1,4 @@
-"""Renders the BTP Deploy Doctor terminal demo from real CLI output into GIF and MP4.
+"""Renders the Deploy Doctor for SAP BTP terminal demo from real CLI output into GIF and MP4.
 
 Usage (needs Pillow and imageio-ffmpeg):
   1. Copy examples/broken-bookshop to a temp folder <work>, and in it save the real output:
@@ -66,7 +66,7 @@ def spans(line):
         return [(m.group(1), RED, False), (m.group(2), WHITE, True), (m.group(3), DIM, False)]
     if re.match(r'^\s+> ', line):
         return [(line, DIM, False)]
-    if line.startswith('BTP Deploy Doctor:') or line.startswith('Found ') or line in ('Next:',) or line.startswith('MTA deploy operations'):
+    if line.startswith('Deploy Doctor for SAP BTP:') or line.startswith('Found ') or line in ('Next:',) or line.startswith('MTA deploy operations'):
         return [(line, WHITE, True)]
     if re.match(r'^\d+ errors?, ', line) or line.startswith('Remaining:'):
         good = line.startswith('0 errors, 0 warnings') or 'Remaining: 0 errors, 0 warnings' in line
@@ -145,10 +145,10 @@ def end_card():
     small = ImageFont.truetype('/System/Library/Fonts/Menlo.ttc', 14 * S, index=0)
     soft, accent = (200, 212, 240), (110, 200, 255)
     lines = [
-        ('BTP Deploy Doctor', big, WHITE, 58),
+        ('Deploy Doctor for SAP BTP', big, WHITE, 58),
         ('Catch SAP BTP deployment mistakes before cf deploy', mid, soft, 32),
         ('Free for VS Code and SAP Business Application Studio', mid, soft, 56),
-        ('Search "BTP Deploy Doctor" in the Extensions view', small, accent, 30),
+        ('Search "Deploy Doctor for SAP BTP" in the Extensions view', small, accent, 30),
         ('havisun.com', small, (150, 160, 185), 0),
     ]
     block = icon.height + 36 * S + sum(g for *_, g in lines) * S + LH

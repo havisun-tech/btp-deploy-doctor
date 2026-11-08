@@ -166,3 +166,27 @@ test('findings are sorted errors first', () => {
   const sev = runChecks(makeProject({ 'package.json': p })).findings.map((f) => f.severity);
   assert.deepEqual(sev, [...sev].sort((a, b) => ['error', 'warning', 'info'].indexOf(a) - ['error', 'warning', 'info'].indexOf(b)));
 });
+
+// ---------------- sizing and cost ----------------
+
+test('MTA012 memory well above typical is info, normal sizes are not reported', () => {
+  const big = runChecks(makeProject({ 'mta.yaml': CLEAN_MTA.replace('memory: 256M', 'memory: 2G') })).findings.find((f) => f.ruleId === 'MTA012');
+  assert.equal(big?.severity, 'info');
+  assert.ok(!runChecks(makeProject({ 'mta.yaml': CLEAN_MTA.replace('memory: 256M', 'memory: 1G') })).findings.some((f) => f.ruleId === 'MTA012'));
+});
+
+test('MTA013 HANA Cloud database created by the MTA, and paid application logging plans', () => {
+  const mta = CLEAN_MTA + `  - name: bookshop-hana
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: hana-cloud
+      service-plan: hana
+  - name: bookshop-logs
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: application-logs
+      service-plan: standard
+`;
+  const titles = runChecks(makeProject({ 'mta.yaml': mta })).findings.filter((f) => f.ruleId === 'MTA013').map((f) => f.title);
+  assert.deepEqual(titles.sort(), ['Application logging uses the "standard" plan', 'mta.yaml creates a HANA Cloud database ("bookshop-hana")']);
+});

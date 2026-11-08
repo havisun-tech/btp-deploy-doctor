@@ -242,6 +242,26 @@ export function mtaRules(p: Project): Finding[] {
     }
   }
 
+  // MTA012 – memory well above what these apps usually need (you pay for what you reserve)
+  for (const m of modules) {
+    const limit = isApprouter(m) ? 512 : m.type === 'nodejs' ? 1024 : undefined;
+    const mb = parseSizeMb(m.parameters.memory);
+    if (!limit || mb === undefined || mb <= limit) continue;
+    const instances = Number(m.parameters.instances) > 1 ? Number(m.parameters.instances) : 1;
+    add('MTA012', 'info', `Module "${m.name}" reserves ${m.parameters.memory} memory`, `${isApprouter(m) ? 'An approuter usually runs in 256M' : 'Most CAP Node.js services run in 256M to 512M'}. Cloud Foundry bills the memory you reserve${instances > 1 ? `, times ${instances} instances` : ''}, whether the app uses it or not.`, `Check the real usage with "cf app ${m.name}" and lower "memory" to fit. Keep the higher value only if the app needs it.`, ['modules', m.idx, 'parameters', 'memory']);
+  }
+
+  // MTA013 – services that cost money or hold data the MTA lifecycle can delete
+  for (const r of resources) {
+    const svc = String(r.parameters.service ?? '');
+    const plan = String(r.parameters['service-plan'] ?? '');
+    if (svc === 'hana-cloud') {
+      add('MTA013', 'info', `mta.yaml creates a HANA Cloud database ("${r.name}")`, 'The database instance is created and owned by this MTA. "cf undeploy --delete-services" deletes it with all its data, and every space you deploy to gets its own billed database.', 'Usually the HANA Cloud database is created once in the BTP cockpit and the MTA only creates HDI containers (service: hana, plan: hdi-shared). Keep this only if each deployment really needs its own database.', ['resources', r.idx, 'parameters', 'service']);
+    } else if (svc === 'application-logs' && (plan === 'standard' || plan === 'premium')) {
+      add('MTA013', 'info', `Application logging uses the "${plan}" plan`, `The ${plan} plan of application-logs is billed by log volume. That is right for production, but development and test spaces usually do fine with "lite".`, 'Use "lite" outside production, for example with an MTA extension descriptor (mtaext) per space.', ['resources', r.idx, 'parameters', 'service-plan']);
+    }
+  }
+
   // MTA011 – how cds build is invoked
   const cdsDkInstalled = '@sap/cds-dk' in p.devDependencies || '@sap/cds-dk' in p.dependencies;
   const dkRange = majorRange(p.dependencies['@sap/cds']);

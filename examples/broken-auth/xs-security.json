@@ -1,0 +1,27 @@
+{
+  "xsappname": "orders",
+  "tenant-mode": "dedicated",
+  "scopes": [
+    { "name": "$XSAPPNAME.SalesRep", "description": "Sales representative" },
+    { "name": "$XSAPPNAME.SalesManager", "description": "Sales manager" }
+  ],
+  "attributes": [],
+  "role-templates": [
+    {
+      "name": "SalesRep",
+      "description": "Sales representative",
+      "scope-references": ["$XSAPPNAME.SalesRep"]
+    },
+    {
+      "name": "SalesManager",
+      "description": "Sales manager",
+      "scope-references": ["$XSAPPNAME.SalesManagr"]
+    }
+  ],
+  "role-collections": [
+    {
+      "name": "Orders Manager",
+      "role-template-references": ["$XSAPPNAME.SalesManagers"]
+    }
+  ]
+}

@@ -275,6 +275,31 @@ export function fioriRules(p: Project): Finding[] {
         if (onlyCloudService) attach(f, jsonFix(p, manifestRel, `Change to "${onlyCloudService}"`, [{ path: ['sap.cloud', 'service'], value: onlyCloudService }]));
       }
 
+      // UI013 / UI014 – what SAP Build Work Zone needs to list the app
+      const forWorkZone = !!service && !usesAppFront && (usesManagedApprouter || cloudServices.size > 0);
+      if (forWorkZone && isPlainObject(cloud) && cloud.public !== true) {
+        attach(
+          add('UI014', 'warning', `"${app.name}" is not public to Work Zone`, `manifest.json sets sap.cloud.service but not "public": true. Work Zone and the cockpit only list apps whose sap.cloud.public is true, so the app is not offered when you build a site.`, 'Set "sap.cloud": { "public": true, ... } in manifest.json.', { file: manifestRel, line: p.jsonKeyLine(manifest, 'sap.cloud') }),
+          jsonFix(p, manifestRel, 'Set sap.cloud.public to true', [{ path: ['sap.cloud', 'public'], value: true }]),
+        );
+      }
+      const sapApp = manifest.data['sap.app'];
+      const inbounds = sapApp?.crossNavigation?.inbounds;
+      if (forWorkZone && isPlainObject(sapApp) && !(isPlainObject(inbounds) && Object.keys(inbounds).length)) {
+        const appId = typeof sapApp.id === 'string' ? sapApp.id : app.name;
+        const semanticObject = (appId.split('.').pop() ?? 'app').replace(/[^A-Za-z0-9]/g, '') || 'app';
+        const title = typeof sapApp.title === 'string' ? sapApp.title : appId;
+        const f = add('UI013', 'info', `"${app.name}" has no navigation target for Work Zone`, `manifest.json has no sap.app.crossNavigation.inbounds. The app is deployed and opens from its URL, but SAP Build Work Zone cannot add it as a tile or to a launchpad page without an inbound (semantic object and action).`, 'Add an inbound, for example with Fiori tools "Fiori Launchpad Configuration", or skip this if the app is not meant for Work Zone.', { file: manifestRel, line: p.jsonKeyLine(manifest, 'sap.app') });
+        const inbound = { [`${semanticObject}-display`]: { semanticObject, action: 'display', title, signature: { parameters: {}, additionalParameters: 'allowed' } } };
+        const fx = jsonFix(p, manifestRel, `Add inbound "${semanticObject}-display"`, [
+          isPlainObject(sapApp.crossNavigation)
+            ? { path: ['sap.app', 'crossNavigation', 'inbounds'], value: inbound }
+            : { path: ['sap.app', 'crossNavigation'], value: { inbounds: inbound } },
+        ]);
+        if (fx) fx.requiresReview = true;
+        attach(f, fx);
+      }
+
       const sources = manifest.data['sap.app']?.dataSources;
       const absolute = isPlainObject(sources)
         ? Object.entries(sources).filter(([, ds]: [string, any]) => typeof ds?.uri === 'string' && /^\/(?!\/)/.test(ds.uri))

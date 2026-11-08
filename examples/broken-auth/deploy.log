@@ -1,0 +1,10 @@
+Deploying multi-target app archive orders_1.0.0.mtar in org dev / space dev as dev@example.com...
+Updating service "orders-auth" from MTA resource "orders-auth"...
+Error updating service "orders-auth" from MTA resource "orders-auth": Service broker error: Invalid scope reference "$XSAPPNAME.SalesManagr" in role template "SalesManager"
+Process failed.
+Use "cf dmol -i 7a2d3f6b-1c0e-11ef-b2c3-ffff00002222" to download the logs of the process.
+
+# After fixing xs-security.json and redeploying, "cf logs orders --recent" showed:
+   2026-11-08T09:12:01.00+0000 [APP/PROC/WEB/0] OUT GET /odata/v4/order/Orders 401 Unauthorized - Error: Invalid token: jwt must be provided
+   2026-11-08T09:14:22.00+0000 [APP/PROC/WEB/0] OUT [cds] - 403 - Forbidden { reason: "User 'maria@example.com' is lacking required roles: [Admin]" }
+   2026-11-08T09:15:40.00+0000 [RTR/0] OUT POST /odata/v4/order/Orders 403 Forbidden - CSRF token validation failed

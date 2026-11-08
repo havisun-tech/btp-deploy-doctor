@@ -30,7 +30,15 @@ const SAMPLES: Record<string, string> = {
   'auth-forbidden': 'GET /odata/v4/admin/Books 403 Forbidden',
   'sqlite-busy': 'Error: SQLITE_BUSY: database is locked',
   'port-in-use': 'Error: listen EADDRINUSE: address already in use :::4004',
-  'broker-error': 'Service broker error: Invalid scope reference in role template',
+  'broker-error': 'Service broker error: Internal Server Error',
+  'cap-missing-role': `[cds] - 403 - Forbidden { reason: "User 'alice' is lacking required roles: [Admin]", user: 'alice' }`,
+  'insufficient-scope': 'WWW-Authenticate: Bearer error="insufficient_scope"',
+  'token-audience': "Error: Jwt token with audience: [ 'sb-other!t1' ] is not issued for these clientIds: [ 'sb-bookshop!t2' ]",
+  'token-expired': 'TokenExpiredError: jwt expired',
+  'token-missing': 'Error: Invalid token: jwt malformed',
+  'csrf-token': 'POST /odata/v4/admin/Books 403 Forbidden - CSRF token validation failed',
+  'redirect-mismatch': 'Invalid redirect https://acme-bookshop.cfapps.eu10.hana.ondemand.com/login/callback did not match one of the registered values',
+  'xsuaa-descriptor-rejected': 'Service broker error: Invalid scope reference in role template "Viewer"',
   'hdi-deploy-failed': 'Deployment to container BOOKSHOP_HDI failed - error: Error executing make',
   'ui5-task-missing': "Error: Cannot find module 'ui5-task-zipper'",
   'mbt-artifact-missing': 'ERROR could not copy build artifacts: the "comsapbookshopbrowse.zip" artifact was not found',
@@ -91,4 +99,20 @@ test('clean log has no matches', () => {
   const r = analyzeLog('[cds] - serving CatalogService { path: /odata/v4/catalog }\n[cds] - server listening on { url: http://localhost:4004 }');
   assert.equal(r.matches.length, 0);
   assert.equal(r.otherErrors.length, 0);
+});
+
+test('a specific 401/403 cause replaces the general one on the same line', () => {
+  const ids = analyzeLog('POST /odata/v4/admin/Books 403 Forbidden - CSRF token validation failed').matches.map((m) => m.patternId);
+  assert.deepEqual(ids, ['csrf-token']);
+});
+
+test('names the missing role', () => {
+  const m = analyzeLog(`reason: "User 'bob' is lacking required roles: [ 'Admin', 'Viewer' ]"`).matches[0];
+  assert.equal(m.patternId, 'cap-missing-role');
+  assert.match(m.explanation, /required role\(s\): 'Admin', 'Viewer'\./);
+});
+
+test('an invalid CSRF token is not reported as a missing user token', () => {
+  const ids = analyzeLog('Error: invalid csrf token').matches.map((m) => m.patternId);
+  assert.deepEqual(ids, ['csrf-token']);
 });

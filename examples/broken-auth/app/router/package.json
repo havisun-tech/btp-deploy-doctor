@@ -1,0 +1,5 @@
+{
+  "name": "orders-approuter",
+  "dependencies": { "@sap/approuter": "^20" },
+  "scripts": { "start": "node node_modules/@sap/approuter/approuter.js" }
+}

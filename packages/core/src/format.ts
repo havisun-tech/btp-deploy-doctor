@@ -18,7 +18,7 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 export function formatCheck(r: CheckResult, opts: FormatOptions = {}): string {
   const c = palette(!!opts.color);
   const icon: Record<Severity, string> = { error: c.red('✖ error  '), warning: c.yellow('▲ warning'), info: c.cyan('● info   ') };
-  const out: string[] = [c.bold(`BTP Deploy Doctor: ${r.root}`), ''];
+  const out: string[] = [c.bold(`Deploy Doctor for SAP BTP: ${r.root}`), ''];
   const pad = ' '.repeat(13);
   for (const f of r.findings) {
     const where = `${f.location.file}${f.location.line ? `:${f.location.line}` : ''}`;

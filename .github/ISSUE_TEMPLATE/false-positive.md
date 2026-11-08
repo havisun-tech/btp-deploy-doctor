@@ -22,6 +22,6 @@ labels: rules
 <!-- This tells us whether the rule is wrong or right. Include the cf deploy error if it failed. -->
 
 **Versions**
-- BTP Deploy Doctor:
+- Deploy Doctor for SAP BTP:
 - @sap/cds:
 - Editor: VS Code / BAS / CLI / MCP

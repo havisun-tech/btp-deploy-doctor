@@ -194,7 +194,11 @@ builder:
     ],
   },
   'app/browse/webapp/manifest.json': {
-    'sap.app': { id: 'com.sap.bookshop.browse', dataSources: { mainService: { uri: 'odata/v4/catalog/', type: 'OData' } } },
+    'sap.app': {
+      id: 'com.sap.bookshop.browse',
+      dataSources: { mainService: { uri: 'odata/v4/catalog/', type: 'OData' } },
+      crossNavigation: { inbounds: { 'Books-display': { semanticObject: 'Books', action: 'display', signature: { parameters: {}, additionalParameters: 'allowed' } } } },
+    },
     'sap.cloud': { public: true, service: 'bookshop' },
   },
 };

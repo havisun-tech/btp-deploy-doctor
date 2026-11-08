@@ -220,3 +220,38 @@ test('MT009 static HDI deployer in a multitenant app', () => {
   const mta = MTX_MTA.replace('resources:\n', '  - name: saas-db-deployer\n    type: hdb\n    path: gen/db\n    requires:\n      - name: saas-hdi\nresources:\n  - name: saas-hdi\n    type: com.sap.xs.hdi-container\n    parameters:\n      service: hana\n      service-plan: hdi-shared\n');
   assert.ok(ids(mtx({ 'mta.yaml': mta })).includes('MT009'));
 });
+
+// ---------------- Work Zone ----------------
+
+const manifestWith = (patch: (m: any) => void) => {
+  const m = clone(FIORI_FILES['app/browse/webapp/manifest.json']);
+  patch(m);
+  return { 'app/browse/webapp/manifest.json': m };
+};
+
+test('UI013 no inbound for Work Zone is info, and its fix needs review', () => {
+  const dir = fiori(manifestWith((m) => delete m['sap.app'].crossNavigation));
+  const f = findingOf(dir, 'UI013');
+  assert.equal(f.severity, 'info');
+  assert.equal(f.fixes?.[0].requiresReview, true);
+  applyFixToDisk(dir, f.fixes![0]);
+  const inbound = JSON.parse(read(dir, 'app/browse/webapp/manifest.json'))['sap.app'].crossNavigation.inbounds['browse-display'];
+  assert.deepEqual([inbound.semanticObject, inbound.action], ['browse', 'display']);
+  assert.ok(!ids(dir).includes('UI013'));
+});
+
+test('UI013 keeps existing outbounds when adding the inbound', () => {
+  const dir = fiori(manifestWith((m) => (m['sap.app'].crossNavigation = { outbounds: { toOrders: { semanticObject: 'Orders', action: 'display' } } })));
+  applyFixToDisk(dir, findingOf(dir, 'UI013').fixes![0]);
+  const nav = JSON.parse(read(dir, 'app/browse/webapp/manifest.json'))['sap.app'].crossNavigation;
+  assert.ok(nav.outbounds.toOrders && nav.inbounds['browse-display']);
+});
+
+test('UI013 is not reported for apps served by the Application Frontend service', () => {
+  const mta = FIORI_MTA.replace('resources:\n', 'resources:\n  - name: bookshop-app-front\n    type: org.cloudfoundry.managed-service\n    parameters:\n      service: app-front\n      service-plan: developer\n');
+  assert.ok(!ids(fiori({ 'mta.yaml': mta, ...manifestWith((m) => delete m['sap.app'].crossNavigation) })).includes('UI013'));
+});
+
+test('UI014 sap.cloud.public missing, fix sets it', () => {
+  fixes(fiori(manifestWith((m) => delete m['sap.cloud'].public)), 'UI014');
+});
