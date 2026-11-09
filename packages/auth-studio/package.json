@@ -1,0 +1,176 @@
+{
+  "name": "auth-studio-vscode",
+  "displayName": "Auth Studio for SAP BTP",
+  "description": "Visual editor for xs-security.json and a view of AMS policies, both checked against your CAP model, plus a local token decoder that explains 401 and 403 errors.",
+  "version": "0.1.0",
+  "publisher": "HavisunTechnologies",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "HAVISUN Technologies Inc.",
+    "url": "https://www.havisun.com"
+  },
+  "homepage": "https://github.com/havisun-tech/btp-deploy-doctor/tree/main/packages/auth-studio#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/havisun-tech/btp-deploy-doctor.git",
+    "directory": "packages/auth-studio"
+  },
+  "bugs": {
+    "url": "https://github.com/havisun-tech/btp-deploy-doctor/issues"
+  },
+  "icon": "images/icon.png",
+  "preview": true,
+  "galleryBanner": {
+    "color": "#0b5d4b",
+    "theme": "dark"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "sap",
+    "btp",
+    "cap",
+    "xsuaa",
+    "xs-security",
+    "roles",
+    "role collections",
+    "jwt",
+    "auth studio",
+    "ams",
+    "ias",
+    "dcl",
+    "authorization management service"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "authStudio.xsSecurity",
+        "displayName": "Auth Studio",
+        "selector": [
+          {
+            "filenamePattern": "xs-security*.json"
+          }
+        ],
+        "priority": "option"
+      }
+    ],
+    "commands": [
+      {
+        "command": "authStudio.open",
+        "title": "Open in Auth Studio",
+        "category": "Auth Studio",
+        "icon": "$(shield)"
+      },
+      {
+        "command": "authStudio.openAsJson",
+        "title": "Open as JSON",
+        "category": "Auth Studio",
+        "icon": "$(json)"
+      },
+      {
+        "command": "authStudio.createFromCds",
+        "title": "Create xs-security.json from CDS Model",
+        "category": "Auth Studio"
+      },
+      {
+        "command": "authStudio.decodeToken",
+        "title": "Explain a Token (JWT)...",
+        "category": "Auth Studio"
+      },
+      {
+        "command": "authStudio.openPolicies",
+        "title": "Open AMS Policies",
+        "category": "Auth Studio",
+        "icon": "$(shield)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "authStudio.open",
+          "when": "resourceFilename =~ /^xs-security.*\\.json$/ && activeCustomEditorId != 'authStudio.xsSecurity'",
+          "group": "navigation"
+        },
+        {
+          "command": "authStudio.openAsJson",
+          "when": "activeCustomEditorId == 'authStudio.xsSecurity'",
+          "group": "navigation"
+        },
+        {
+          "command": "authStudio.openPolicies",
+          "when": "resourceExtname == .dcl",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "authStudio.open",
+          "when": "resourceFilename =~ /^xs-security.*\\.json$/",
+          "group": "navigation@9"
+        },
+        {
+          "command": "authStudio.openPolicies",
+          "when": "resourceExtname == .dcl",
+          "group": "navigation@9"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "authStudio.openAsJson",
+          "when": "activeCustomEditorId == 'authStudio.xsSecurity'"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Auth Studio for SAP BTP",
+      "properties": {
+        "authStudio.cfPath": {
+          "type": "string",
+          "default": "cf",
+          "description": "Path to the Cloud Foundry CLI, used in the \"Push to XSUAA\" command."
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "sap-dcl",
+        "aliases": [
+          "AMS DCL",
+          "DCL"
+        ],
+        "extensions": [
+          ".dcl"
+        ],
+        "configuration": "./syntaxes/dcl.language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "sap-dcl",
+        "scopeName": "source.sap-dcl",
+        "path": "./syntaxes/dcl.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "esbuild src/extension.ts --bundle --platform=node --main-fields=module,main --format=cjs --target=node18 --external:vscode --outfile=dist/extension.js --sourcemap",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "esbuild src/test/model.test.ts src/test/ams.test.ts --bundle --platform=node --main-fields=module,main --format=cjs --target=node18 --outdir=dist-test && node --test dist-test/",
+    "package": "npm run build && npx --yes @vscode/vsce package --no-dependencies"
+  },
+  "dependencies": {
+    "btp-deploy-doctor": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/vscode": "~1.85.0",
+    "esbuild": "^0.23.0",
+    "typescript": "^5.5.0"
+  }
+}

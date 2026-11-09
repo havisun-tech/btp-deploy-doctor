@@ -1,0 +1,34 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "AMS DCL",
+  "scopeName": "source.sap-dcl",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#annotations" },
+    { "name": "keyword.control.sap-dcl", "match": "(?i)\\b(POLICY|SCHEMA|USE|RESTRICT|ASSIGN|ROLE|GRANT|ON|WHERE|INTERNAL|DEFAULT|FUNCTION|RETURN|TEST|EXPECT|INPUT)\\b" },
+    { "name": "keyword.operator.word.sap-dcl", "match": "(?i)\\b(AND|OR|NOT|IS|IN|BETWEEN|LIKE|ESCAPE|RESTRICTED|NULL)\\b" },
+    { "name": "constant.language.sap-dcl", "match": "(?i)\\b(TRUE|FALSE)\\b" },
+    { "name": "support.type.sap-dcl", "match": "\\b(String|Number|Boolean)\\b" },
+    { "name": "variable.language.sap-dcl", "match": "\\$[A-Za-z_]\\w*" },
+    { "name": "constant.numeric.sap-dcl", "match": "\\b\\d+(\\.\\d+)?\\b" },
+    { "name": "keyword.operator.sap-dcl", "match": "<=|>=|<>|!=|=|<|>" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        { "name": "comment.line.double-slash.sap-dcl", "match": "//.*$" },
+        { "name": "comment.block.sap-dcl", "begin": "/\\*", "end": "\\*/" }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        { "name": "string.quoted.single.sap-dcl", "begin": "'", "end": "'", "patterns": [{ "name": "constant.character.escape.sap-dcl", "match": "''" }] },
+        { "name": "entity.name.type.sap-dcl", "begin": "\"", "end": "\"" }
+      ]
+    },
+    "annotations": {
+      "patterns": [{ "name": "storage.type.annotation.sap-dcl", "match": "@[A-Za-z_][\\w.]*" }]
+    }
+  }
+}

@@ -2,11 +2,29 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run extension",
+      "name": "Run Deploy Doctor",
       "type": "extensionHost",
       "request": "launch",
-      "args": ["--extensionDevelopmentPath=${workspaceFolder}/packages/vscode", "${workspaceFolder}/examples/broken-bookshop"],
-      "outFiles": ["${workspaceFolder}/packages/vscode/dist/**/*.js"],
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode",
+        "${workspaceFolder}/examples/broken-bookshop"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/packages/vscode/dist/**/*.js"
+      ],
+      "preLaunchTask": "npm: build"
+    },
+    {
+      "name": "Run Auth Studio",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/auth-studio",
+        "${workspaceFolder}/examples/broken-auth"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/packages/auth-studio/dist/**/*.js"
+      ],
       "preLaunchTask": "npm: build"
     }
   ]

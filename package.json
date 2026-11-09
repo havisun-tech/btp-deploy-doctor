@@ -5,12 +5,13 @@
   "workspaces": [
     "packages/core",
     "packages/mcp",
-    "packages/vscode"
+    "packages/vscode",
+    "packages/auth-studio"
   ],
   "scripts": {
-    "build": "npm run build -w packages/core && npm run build -w packages/mcp && npm run build -w packages/vscode",
-    "test": "npm run build -w packages/core && npm run build -w packages/mcp && npm test -w packages/core && npm test -w packages/mcp",
-    "typecheck": "npm run typecheck -w packages/vscode"
+    "build": "npm run build -w packages/core && npm run build -w packages/mcp && npm run build -w packages/vscode && npm run build -w packages/auth-studio",
+    "test": "npm run build -w packages/core && npm run build -w packages/mcp && npm test -w packages/core && npm test -w packages/mcp && npm test -w packages/auth-studio",
+    "typecheck": "npm run typecheck -w packages/vscode && npm run typecheck -w packages/auth-studio"
   },
   "repository": {
     "type": "git",

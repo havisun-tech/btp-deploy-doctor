@@ -1,0 +1,77 @@
+:root { color-scheme: light dark; }
+body.vscode-light { color-scheme: light; }
+body.vscode-dark, body.vscode-high-contrast { color-scheme: dark; }
+body.vscode-high-contrast-light { color-scheme: light; }
+body {
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  color: var(--vscode-foreground);
+  background: var(--vscode-editor-background);
+  padding: 0 20px 40px;
+  max-width: 1100px;
+}
+header { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; padding: 16px 0 8px; }
+h1 { font-size: 1.5em; margin: 0 0 2px; font-weight: 600; }
+h2 { font-size: 1.1em; margin: 20px 0 6px; font-weight: 600; }
+.actions, .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.muted, .hint { color: var(--vscode-descriptionForeground); }
+.hint { margin: 0 0 10px; }
+code { font-family: var(--vscode-editor-font-family); background: var(--vscode-textCodeBlock-background); padding: 1px 4px; border-radius: 3px; }
+a { color: var(--vscode-textLink-foreground); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+nav { display: flex; gap: 2px; border-bottom: 1px solid var(--vscode-panel-border); margin: 8px 0 4px; flex-wrap: wrap; }
+nav button { background: none; color: var(--vscode-foreground); border: none; border-bottom: 2px solid transparent; padding: 8px 12px; opacity: 0.75; border-radius: 0; }
+nav button.active { border-bottom-color: var(--vscode-focusBorder); opacity: 1; font-weight: 600; }
+nav button:hover { background: var(--vscode-toolbar-hoverBackground); }
+
+button {
+  font: inherit;
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: 1px solid var(--vscode-button-border, transparent);
+  padding: 4px 12px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+button:hover { background: var(--vscode-button-hoverBackground); }
+button.secondary { background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); }
+button.secondary:hover { background: var(--vscode-button-secondaryHoverBackground); }
+button.small { padding: 1px 8px; margin-left: 6px; }
+button.icon { background: none; color: var(--vscode-descriptionForeground); padding: 0 4px; border: none; }
+button.icon:hover { color: var(--vscode-foreground); background: var(--vscode-toolbar-hoverBackground); }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible { outline: 1px solid var(--vscode-focusBorder); outline-offset: 1px; }
+
+table { border-collapse: collapse; margin: 4px 0 8px; }
+th, td { text-align: left; padding: 5px 10px; border-bottom: 1px solid var(--vscode-panel-border); vertical-align: top; }
+thead th { font-weight: 600; color: var(--vscode-descriptionForeground); white-space: nowrap; }
+table.form th { width: 160px; color: var(--vscode-descriptionForeground); font-weight: normal; }
+.matrix td.c { text-align: center; }
+.matrix tbody th { font-weight: normal; white-space: nowrap; }
+.scroll { overflow-x: auto; }
+input[type=checkbox] { accent-color: var(--vscode-focusBorder); width: 15px; height: 15px; cursor: pointer; }
+select, textarea {
+  font: inherit;
+  background: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  border: 1px solid var(--vscode-input-border, var(--vscode-panel-border));
+  padding: 4px 6px;
+}
+textarea { width: 100%; box-sizing: border-box; font-family: var(--vscode-editor-font-family); resize: vertical; }
+
+.ok { color: var(--vscode-testing-iconPassed, #3fb950); }
+.bad { color: var(--vscode-errorForeground); }
+.badge { padding: 2px 8px; border-radius: 10px; font-size: 0.9em; border: 1px solid currentColor; }
+.badge.warn { color: var(--vscode-editorWarning-foreground); }
+.ref { white-space: nowrap; }
+.tag { font-size: 0.85em; padding: 0 6px; border-radius: 8px; background: var(--vscode-badge-background); color: var(--vscode-badge-foreground); font-weight: normal; }
+.banner { border-left: 3px solid var(--vscode-focusBorder); background: var(--vscode-textBlockQuote-background); padding: 8px 12px; margin: 8px 0; }
+.banner.bad { border-left-color: var(--vscode-errorForeground); }
+ul.issues, ul.plain { list-style: none; padding: 0; margin: 4px 0; }
+ul.issues li { padding: 3px 0; }
+li.error, .finding.error > div:first-child { color: var(--vscode-errorForeground); }
+li.warning { color: var(--vscode-editorWarning-foreground); }
+.finding { border-bottom: 1px solid var(--vscode-panel-border); padding: 8px 0; }
+.finding > div { margin: 2px 0; }
+.finding .row { margin-top: 6px; }
+section { margin-bottom: 8px; }

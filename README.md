@@ -3,7 +3,7 @@
 [![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/HavisunTechnologies.btp-deploy-doctor-vscode?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=HavisunTechnologies.btp-deploy-doctor-vscode)
 [![Open VSX](https://img.shields.io/open-vsx/v/HavisunTechnologies/btp-deploy-doctor-vscode?label=Open%20VSX)](https://open-vsx.org/extension/HavisunTechnologies/btp-deploy-doctor-vscode)
 
-Finds SAP BTP / CAP deployment mistakes **before** `cf deploy`, fixes most of them automatically, and explains failed deploy and app logs **after** it. Covers CAP services, roles and login (XSUAA), Fiori apps in the HTML5 application repository (managed approuter, Work Zone) and multitenant SaaS apps.
+Finds SAP BTP / CAP deployment mistakes **before** `cf deploy`, fixes most of them automatically, and explains failed deploy and app logs **after** it. Covers CAP services, roles and login (XSUAA, and AMS policies on IAS), Fiori apps in the HTML5 application repository (managed approuter, Work Zone) and multitenant SaaS apps.
 
 ![Deploy Doctor for SAP BTP finds deployment problems, fixes them and explains a failed deploy log](media/btp-deploy-doctor-demo.gif)
 
@@ -11,6 +11,7 @@ Finds SAP BTP / CAP deployment mistakes **before** `cf deploy`, fixes most of th
 |---|---|
 | [`packages/core`](packages/core) | `btp-doctor` CLI and library: project checks, log analyzer, cf log fetching |
 | [`packages/vscode`](packages/vscode) | VS Code extension. Also runs in SAP Business Application Studio (BAS) |
+| [`packages/auth-studio`](packages/auth-studio) | Auth Studio for SAP BTP: visual editor for xs-security.json and a view of AMS policies, checked against the CAP model, plus a local token decoder |
 | [`packages/mcp`](packages/mcp) | MCP server, so AI assistants such as Claude Code, Copilot and Cursor can check, fix and diagnose |
 
 ## Install
@@ -36,6 +37,7 @@ Examples, each with a matching failed `deploy.log`:
 | `examples/broken-fiori` | Fiori app: artifact names, destinations, sap.cloud.service, packaging |
 | `examples/broken-saas` | Multitenant app: tenant mode, Service Manager, TENANT_HOST_PATTERN, MTX |
 | `examples/broken-auth` | Roles and login: roles missing from xs-security.json, bad references, approuter binding, token forwarding, 401/403 logs |
+| `examples/broken-ams` | IAS with AMS policies: a role no policy assigns, typos in roles, policies and attributes, schema mapping, policy deployer |
 
 To try the MCP server in Claude Code, open this folder and approve the `btp-doctor` server from `.mcp.json`. Then ask, for example, "check examples/broken-fiori and fix what's safe". Setup for other clients is in [packages/mcp/README.md](packages/mcp/README.md).
 
