@@ -1,4 +1,4 @@
-import { FormattingOptions, ParseError, applyEdits, findNodeAtLocation, modify, parse as parseJsonc, parseTree } from 'jsonc-parser';
+import { FormattingOptions, Node as JsonNode, ParseError, applyEdits, findNodeAtLocation, modify, parse as parseJsonc, parseTree } from 'jsonc-parser';
 import { Document, isMap, isScalar, isSeq, parseDocument } from 'yaml';
 import { Project } from '../project';
 import { FileChange } from '../types';
@@ -109,6 +109,16 @@ export interface JsonOp {
 export function editJson(p: Project, rel: string, ops: JsonOp[]): FileChange | undefined {
   const original = p.readText(rel);
   if (original === undefined) return undefined;
+  const text = editJsonText(original, ops);
+  return text === undefined || text === original ? undefined : { file: rel, before: original, after: text };
+}
+
+/**
+ * Applies JSON edits to text with minimal changes: the formatting, key order and untouched
+ * lines are kept. Appending with index -1 copies the style of the last item.
+ * Returns undefined when the text is not valid JSON.
+ */
+export function editJsonText(original: string, ops: JsonOp[]): string | undefined {
   const errors: ParseError[] = [];
   parseJsonc(original, errors, { allowTrailingComma: false, disallowComments: true });
   if (errors.length) return undefined;
@@ -121,6 +131,26 @@ export function editJson(p: Project, rel: string, ops: JsonOp[]): FileChange | u
   let text = original;
   for (const op of ops) {
     const key = op.path[op.path.length - 1];
+    if (typeof key === 'number' && key >= 0 && op.value === undefined) {
+      const removed = removeFromArray(text, op.path);
+      if (removed !== undefined) {
+        text = removed;
+        continue;
+      }
+    }
+    const style = listStyle(text);
+    if (Array.isArray(op.value) && op.value.every((x) => typeof x !== 'object' || x === null) && style) {
+      // Replacing a list of plain values: write it the way the file writes its other lists.
+      const node = findNodeAtLocation(parseTree(text)!, op.path);
+      if (node?.type === 'array') {
+        const lineStart = text.lastIndexOf('\n', node.offset) + 1;
+        const pad = /^[ \t]*/.exec(text.slice(lineStart))![0];
+        const eol = text.includes('\r\n') ? '\r\n' : '\n';
+        const json = style === 'inline' ? inlineJson(op.value) : blockJson(op.value, indent, pad, false).replace(/\n/g, eol);
+        text = text.slice(0, node.offset) + json + text.slice(node.offset + node.length);
+        continue;
+      }
+    }
     if (key === -1) {
       const appended = appendToArray(text, op.path.slice(0, -1), op.value, indent);
       if (appended !== undefined) {
@@ -137,7 +167,26 @@ export function editJson(p: Project, rel: string, ops: JsonOp[]): FileChange | u
         : undefined;
     text = applyEdits(text, modify(text, op.path, op.value, { formattingOptions, getInsertionIndex }));
   }
-  return text === original ? undefined : { file: rel, before: original, after: text };
+  return text;
+}
+
+/**
+ * How the file writes non-empty lists of strings: on one line like ["a", "b"], or one item
+ * per line. The majority wins; undefined when the file has no such list.
+ */
+function listStyle(text: string): 'inline' | 'block' | undefined {
+  let inline = 0;
+  let block = 0;
+  const walk = (n: JsonNode | undefined) => {
+    if (!n) return;
+    if (n.type === 'array' && n.children?.length && n.children.every((c) => c.type === 'string')) {
+      if (text.slice(n.offset, n.offset + n.length).includes('\n')) block++;
+      else inline++;
+    }
+    n.children?.forEach(walk);
+  };
+  walk(parseTree(text));
+  return inline + block === 0 ? undefined : inline >= block ? 'inline' : 'block';
 }
 
 /** One-line JSON with spaces, the way people write short entries by hand: { "a": 1, "b": ["x"] } */
@@ -161,6 +210,29 @@ function blockJson(v: unknown, unit: string, pad: string, inlineLists: boolean):
   return JSON.stringify(v);
 }
 
+/** Removes one array item as a text cut, so the remaining items keep their formatting. */
+function removeFromArray(text: string, path: (string | number)[]): string | undefined {
+  const array = findNodeAtLocation(parseTree(text)!, path.slice(0, -1));
+  const items = array?.type === 'array' ? array.children ?? [] : [];
+  const i = path[path.length - 1] as number;
+  const item = items[i];
+  if (!array || !item) return undefined;
+  let start: number;
+  let end: number;
+  if (items.length === 1) {
+    start = array.offset + 1; // keep "[]"
+    end = array.offset + array.length - 1;
+  } else if (i < items.length - 1) {
+    start = item.offset;
+    end = items[i + 1].offset;
+  } else {
+    const prev = items[i - 1];
+    start = prev.offset + prev.length;
+    end = item.offset + item.length;
+  }
+  return text.slice(0, start) + text.slice(end);
+}
+
 /**
  * Appends to a non-empty JSON array by inserting text after its last item, in the
  * style of that item (one line or block), so the existing items stay untouched.
@@ -175,7 +247,7 @@ function appendToArray(text: string, path: (string | number)[], value: unknown, 
   if (sameLine) return `${text.slice(0, end)}, ${inlineJson(value)}${text.slice(end)}`;
   const lineStart = text.lastIndexOf('\n', last.offset) + 1;
   const pad = /^[ \t]*/.exec(text.slice(lineStart))![0];
-  const inlineLists = /\[\s*"[^"\n]*"(?:\s*,\s*"[^"\n]*")*\s*\]/.test(text);
+  const inlineLists = listStyle(text) === 'inline';
   const eol = text.includes('\r\n') ? '\r\n' : '\n';
   const item = lastText.includes('\n') ? blockJson(value, unit, pad, inlineLists).replace(/\n/g, eol) : inlineJson(value);
   return `${text.slice(0, end)},${eol}${pad}${item}${text.slice(end)}`;

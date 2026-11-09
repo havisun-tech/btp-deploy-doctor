@@ -1,5 +1,5 @@
 import { requiredKind } from '../cds-config';
-import { RoleUse, scanCdsAuth } from '../cds-roles';
+import { RoleUse, scanCdsAuth, templateNameFor } from '../cds-roles';
 import { addRequire, levenshtein } from '../fix/edit';
 import { attach, jsonFix, yamlFix } from '../fix/helpers';
 import { JsonFile, Project } from '../project';
@@ -117,18 +117,19 @@ function roleRules(p: Project, resources: MtaResource[], services: MtaModule[]):
           ? 'Generate the descriptor with "cds compile srv --to xsuaa > xs-security.json" and set "path: ./xs-security.json" on the XSUAA resource.'
           : similar
             ? `Use the same spelling in the CDS model and in ${srcOf('scopes')}.`
-            : `Add the scope "${scope}" and a role template "${use.role}" that references it, or regenerate with "cds compile srv --to xsuaa".`,
+            : `Add the scope "${scope}" and a role template "${templateNameFor(use.role)}" that references it, or regenerate with "cds compile srv --to xsuaa".`,
         use,
       );
       if (editable('scopes', 'role-templates')) {
-        const existing = templates.findIndex((t) => t.name === use.role);
+        const tname = templateNameFor(use.role);
+        const existing = templates.findIndex((t) => t.name === tname);
         const ops = appendOps('scopes', scopes, [{ name: scope, description: use.role }]);
         if (existing >= 0) {
           const refs = asArray(templates[existing]['scope-references']);
           ops.push(refs.length ? { path: ['role-templates', existing, 'scope-references', -1], value: scope } : { path: ['role-templates', existing, 'scope-references'], value: [scope] });
         }
-        else ops.push(...appendOps('role-templates', templates, [{ name: use.role, description: use.role, 'scope-references': [scope] }]));
-        attach(f, fileFix(`Add scope and role template "${use.role}" to ${d.file!.rel}`, ops, !!similar));
+        else ops.push(...appendOps('role-templates', templates, [{ name: tname, description: use.role, 'scope-references': [scope] }]));
+        attach(f, fileFix(`Add scope and role template "${tname}" to ${d.file!.rel}`, ops, !!similar));
       }
       continue;
     }
@@ -146,11 +147,12 @@ function roleRules(p: Project, resources: MtaResource[], services: MtaModule[]):
         use,
       );
       if (editable('role-templates')) {
-        const same = templates.findIndex((t) => t.name === use.role);
+        const tname = templateNameFor(use.role);
+        const same = templates.findIndex((t) => t.name === tname);
         const refs = same >= 0 ? asArray(templates[same]['scope-references']) : [];
         attach(f, same >= 0
-          ? fileFix(`Add "${scope}" to role template "${use.role}"`, [refs.length ? { path: ['role-templates', same, 'scope-references', -1], value: scope } : { path: ['role-templates', same, 'scope-references'], value: [scope] }])
-          : fileFix(`Add role template "${use.role}"`, appendOps('role-templates', templates, [{ name: use.role, description: use.role, 'scope-references': [scope] }])));
+          ? fileFix(`Add "${scope}" to role template "${tname}"`, [refs.length ? { path: ['role-templates', same, 'scope-references', -1], value: scope } : { path: ['role-templates', same, 'scope-references'], value: [scope] }])
+          : fileFix(`Add role template "${tname}"`, appendOps('role-templates', templates, [{ name: tname, description: use.role, 'scope-references': [scope] }])));
       }
     }
   }

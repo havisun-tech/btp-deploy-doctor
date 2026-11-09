@@ -10,11 +10,12 @@ It covers CAP Node.js services, Fiori apps deployed to the HTML5 application rep
 
 ## What it catches
 
-Problems appear in the Problems panel and on the offending line of `mta.yaml`, `package.json`, `.cdsrc.json`, `xs-security.json`, `.cds` files, `manifest.json`, `xs-app.json` and `ui5-deploy.yaml`. A few examples:
+Problems appear in the Problems panel and on the offending line of `mta.yaml`, `package.json`, `.cdsrc.json`, `xs-security.json`, `.cds` and `.dcl` files, `manifest.json`, `xs-app.json` and `ui5-deploy.yaml`. A few examples:
 
 - **CAP service:** the service module is not bound to XSUAA or the destination service, `@sap/xssec` or the HANA driver is only a dev dependency, mock authentication is active in production, or `cds build` never runs so `gen/srv` is empty.
 - **Fiori apps:** the artifact name in mta.yaml does not match the zip the UI5 build creates, `sap.cloud.service` does not match mta.yaml, a route uses a misspelled destination, xs-app.json is left out of the zip, or the HTML5 runtime is not enabled on the destination service, or the app is missing what SAP Build Work Zone needs to list it (`sap.cloud.public`, a navigation inbound).
 - **Roles and login:** a role used in `@requires` or `@restrict` has no scope or role template in xs-security.json (users get 403), a role template or role collection points to a scope, template or attribute that does not exist (XSUAA rejects the deploy), a `$user` attribute is not defined, the approuter is not bound to XSUAA, or a destination does not forward the login token (401).
+- **AMS policies (IAS):** a CDS role that no policy in `ams/dcl` assigns (users get 403), a policy assigning a misspelled role, `USE` of a policy that does not exist, an attribute missing from `schema.dcl`, `@sap/ams` only a dev dependency, or no module in mta.yaml that deploys the policies.
 - **Multitenant apps:** `@sap/cds-mtxs` is missing at runtime, XSUAA is not shared between tenants, Service Manager or the SaaS registry is missing, or the approuter has no `TENANT_HOST_PATTERN`.
 - **Sizing and cost (info):** memory far above what the app needs, a HANA Cloud database created and deleted with the MTA, or a paid logging plan.
 - **Repository hygiene:** `.env`, `default-env.json` or `.cdsrc-private.json` with credentials is not git-ignored.

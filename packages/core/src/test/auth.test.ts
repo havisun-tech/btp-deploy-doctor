@@ -243,3 +243,18 @@ test('fixes append to xs-security.json in the style of the existing entries', ()
     .replace('"description": "Admin" }\n', '"description": "Admin" },\n    { "name": "$XSAPPNAME.Viewer", "description": "Viewer" }\n')
     .replace('["$XSAPPNAME.Admin"] }\n', '["$XSAPPNAME.Admin"] },\n    { "name": "Viewer", "description": "Viewer", "scope-references": ["$XSAPPNAME.Viewer"] }\n'));
 });
+
+test('AUTH001 fix uses a valid role template name for roles with dashes', () => {
+  const dir = project({ 'srv/admin-service.cds': SERVICE.replace("requires: 'Admin'", "requires: 'sales-rep'") });
+  const f = findingOf(dir, 'AUTH001');
+  applyFixToDisk(dir, f.fixes![0]);
+  const x = xs(dir);
+  assert.ok(x.scopes.some((s: any) => s.name === '$XSAPPNAME.sales-rep'));
+  assert.ok(x['role-templates'].some((t: any) => t.name === 'sales_rep' && t['scope-references'].includes('$XSAPPNAME.sales-rep')));
+  assert.ok(!runChecks(dir).findings.some((r) => r.ruleId === 'AUTH001' || r.ruleId === 'AUTH002'));
+});
+
+test('grants pair the roles of a @restrict entry with the attributes its where reads', () => {
+  // The first entry is granted only to the pseudo role authenticated-user, so it carries nothing.
+  assert.deepEqual(scanCdsAuth(project()).grants, [{ roles: ['Viewer', 'Admin'], attributes: ['country'] }]);
+});

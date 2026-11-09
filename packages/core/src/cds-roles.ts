@@ -13,11 +13,21 @@ export interface RoleUse {
   line: number;
 }
 
+/** One @restrict entry: who it is granted to, and which user attributes its where condition reads. */
+export interface CdsGrant {
+  roles: string[];
+  attributes: string[];
+}
+
+/** XSUAA role template and attribute names allow only letters, digits and "_" (max 64). */
+export const templateNameFor = (role: string) => role.replace(/[^A-Za-z0-9_]/g, '_').slice(0, 64) || 'Role';
+
 export interface CdsAuth {
   /** Roles from @requires and @restrict "to", first use of each. */
   roles: RoleUse[];
   /** User attributes read in @restrict "where" conditions, as $user.<name>. */
   attributes: RoleUse[];
+  grants: CdsGrant[];
   filesScanned: number;
 }
 
@@ -85,7 +95,7 @@ export function blankComments(src: string): string {
 }
 
 /** Index of the bracket closing the one at `open`, skipping strings. */
-function closing(src: string, open: number): number {
+export function closing(src: string, open: number): number {
   const pairs: Record<string, string> = { '[': ']', '{': '}', '(': ')' };
   const stack: string[] = [];
   for (let i = open; i < src.length; i++) {
@@ -111,6 +121,7 @@ function stringsIn(value: string, base: number): { s: string; at: number }[] {
 export function scanCdsAuth(root: string): CdsAuth {
   const roles = new Map<string, RoleUse>();
   const attributes = new Map<string, RoleUse>();
+  const grants: CdsGrant[] = [];
   const files = cdsFiles(root);
   for (const abs of files) {
     let raw: string;
@@ -152,7 +163,23 @@ export function scanCdsAuth(root: string): CdsAuth {
         if (BUILTIN_USER_PROPS.has(name) || attributes.has(name)) continue;
         attributes.set(name, { role: name, file: rel, line: lineAt(src, open + (a.index ?? 0)) });
       }
+      // Each { ... } entry of the array is one grant.
+      for (let i = 1; i < block.length; i++) {
+        if (block[i] === "'") {
+          for (i++; i < block.length && block[i] !== "'"; i++);
+          continue;
+        }
+        if (block[i] !== '{') continue;
+        const end = closing(block, i);
+        const entry = block.slice(i, end + 1);
+        const to = /\bto\s*:\s*/.exec(entry);
+        const value = to ? (entry[to.index + to[0].length] === '[' ? entry.slice(to.index + to[0].length, closing(entry, to.index + to[0].length) + 1) : /^'(?:[^']|'')*'/.exec(entry.slice(to.index + to[0].length))?.[0] ?? '') : '';
+        const roleList = stringsIn(value, 0).map((x) => x.s.trim()).filter((r) => r && !PSEUDO_ROLES.has(r));
+        const attrList = [...new Set([...entry.matchAll(/\$user\.([A-Za-z_]\w*)/g)].map((m) => m[1]).filter((n) => !BUILTIN_USER_PROPS.has(n)))];
+        if (roleList.length || attrList.length) grants.push({ roles: roleList, attributes: attrList });
+        i = end;
+      }
     }
   }
-  return { roles: [...roles.values()], attributes: [...attributes.values()], filesScanned: files.length };
+  return { roles: [...roles.values()], attributes: [...attributes.values()], grants, filesScanned: files.length };
 }

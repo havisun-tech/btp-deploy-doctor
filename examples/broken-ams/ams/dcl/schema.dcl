@@ -1,0 +1,3 @@
+SCHEMA {
+	Region: String
+}

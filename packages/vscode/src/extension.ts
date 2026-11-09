@@ -48,12 +48,12 @@ export function activate(ctx: vscode.ExtensionContext) {
     vscode.commands.registerCommand('btpDoctor.applyFix', applyFixCommand),
     vscode.commands.registerCommand('btpDoctor.fixAll', fixAllCommand),
     vscode.languages.registerCodeActionsProvider(
-      { scheme: 'file', pattern: '**/{mta.yaml,mta.yml,package.json,.cdsrc.json,.gitignore,manifest.json,xs-app.json,ui5-deploy.yaml,xs-security.json,*.cds}' },
+      { scheme: 'file', pattern: '**/{mta.yaml,mta.yml,package.json,.cdsrc.json,.gitignore,manifest.json,xs-app.json,ui5-deploy.yaml,xs-security.json,*.cds,*.dcl}' },
       { provideCodeActions },
       { providedCodeActionKinds: [vscode.CodeActionKind.QuickFix] },
     ),
     vscode.workspace.onDidSaveTextDocument((doc) => {
-      if (config().get<boolean>('checkOnSave', true) && (WATCHED.has(path.basename(doc.fileName)) || doc.fileName.endsWith('.cds'))) checkWorkspace(false);
+      if (config().get<boolean>('checkOnSave', true) && (WATCHED.has(path.basename(doc.fileName)) || /\.(cds|dcl)$/.test(doc.fileName))) checkWorkspace(false);
     }),
   );
   checkWorkspace(false);

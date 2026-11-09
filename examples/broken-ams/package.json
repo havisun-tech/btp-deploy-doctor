@@ -1,0 +1,34 @@
+{
+  "name": "orders-ams",
+  "version": "1.0.0",
+  "description": "Broken on purpose: CAP app with IAS and AMS policies, for Deploy Doctor and Auth Studio.",
+  "private": true,
+  "dependencies": {
+    "@cap-js/hana": "^2",
+    "@sap/cds": "^9",
+    "@sap/xssec": "^4",
+    "express": "^4"
+  },
+  "devDependencies": {
+    "@sap/ams": "^3",
+    "@sap/ams-dev": "^3",
+    "@sap/cds-dk": "^9"
+  },
+  "scripts": {
+    "start": "cds-serve"
+  },
+  "engines": {
+    "node": "^20 || ^22"
+  },
+  "cds": {
+    "requires": {
+      "auth": {
+        "[development]": { "kind": "mocked" },
+        "[production]": { "kind": "ias" }
+      },
+      "db": {
+        "[production]": { "kind": "hana" }
+      }
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import { Project } from './project';
+import { amsRules } from './rules/ams';
 import { authRules } from './rules/auth';
 import { cdsRules } from './rules/cds';
 import { crossRules } from './rules/cross';
@@ -35,7 +36,7 @@ export function runChecks(root: string): CheckResult {
     });
     findings.push(...repoRules(p));
   } else {
-    findings.push(...mtaRules(p), ...cdsRules(p), ...crossRules(p), ...fioriRules(p), ...mtxRules(p), ...authRules(p), ...repoRules(p));
+    findings.push(...mtaRules(p), ...cdsRules(p), ...crossRules(p), ...fioriRules(p), ...mtxRules(p), ...authRules(p), ...amsRules(p), ...repoRules(p));
   }
   findings.sort(
     (a, b) =>
