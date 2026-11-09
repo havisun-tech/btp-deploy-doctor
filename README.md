@@ -5,6 +5,8 @@
 
 Finds SAP BTP / CAP deployment mistakes **before** `cf deploy`, fixes most of them automatically, and explains failed deploy and app logs **after** it. Covers CAP services, roles and login (XSUAA, and AMS policies on IAS), Fiori apps in the HTML5 application repository (managed approuter, Work Zone) and multitenant SaaS apps.
 
+Product pages: [Deploy Doctor](https://www.havisun.com/tools/btp-deploy-doctor/) and [Auth Studio](https://www.havisun.com/tools/auth-studio/) on havisun.com. Guides: [SAP BTP deployment checklist](https://www.havisun.com/insights/sap-btp-deployment-checklist.html) and [Why a CAP app returns 403 after deploy](https://www.havisun.com/insights/sap-cap-403-forbidden-after-deploy.html).
+
 ![Deploy Doctor for SAP BTP finds deployment problems, fixes them and explains a failed deploy log](media/btp-deploy-doctor-demo.gif)
 
 | Package | What it is |
@@ -62,6 +64,10 @@ To run the extension from source, open this folder in VS Code and press F5 (uses
 
 - **Static check:** add it to the matching file in `packages/core/src/rules/` with a new rule ID, and a test in `src/test/check.test.ts` that breaks the clean fixture.
 - **Log pattern:** add it to `packages/core/src/logs/patterns.ts` and a sample line to `src/test/logs.test.ts`. The test suite fails if a pattern has no sample.
+
+## About
+
+Made by [HAVISUN Technologies](https://www.havisun.com). More free tools for SAP BTP: [havisun.com/tools](https://www.havisun.com/tools/).
 
 ## Trademarks
 

@@ -2,14 +2,14 @@
   "name": "btp-deploy-doctor-vscode",
   "displayName": "Deploy Doctor for SAP BTP",
   "description": "Catches SAP BTP / CAP deployment mistakes in mta.yaml, package.json, xs-security.json and Fiori apps, fixes them in one click, and explains failed cf deploy logs and 401/403 errors.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "HavisunTechnologies",
   "license": "Apache-2.0",
   "author": {
     "name": "HAVISUN Technologies Inc.",
     "url": "https://www.havisun.com"
   },
-  "homepage": "https://github.com/havisun-tech/btp-deploy-doctor#readme",
+  "homepage": "https://www.havisun.com/tools/btp-deploy-doctor/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/havisun-tech/btp-deploy-doctor.git",

@@ -2,6 +2,8 @@
 
 A visual editor for `xs-security.json`, and a view of AMS policies for apps on Identity Authentication (IAS), both checked against your CAP model. See which roles your CDS annotations require, whether users can actually get them, and fix the gaps in a click. Paste a token to find out why a request gets 401 or 403. Works in VS Code and SAP Business Application Studio (BAS).
 
+[Product page](https://www.havisun.com/tools/auth-studio/) · [Guide: Why your SAP CAP app returns 403 after deploy](https://www.havisun.com/insights/sap-cap-403-forbidden-after-deploy.html)
+
 ![Auth Studio shows the roles used in the CDS model, which are missing from xs-security.json, and the role templates and scopes](https://raw.githubusercontent.com/havisun-tech/btp-deploy-doctor/main/media/auth-studio-roles.png)
 
 > **Preview.** Please [report problems or ideas](https://github.com/havisun-tech/btp-deploy-doctor/issues/new/choose).

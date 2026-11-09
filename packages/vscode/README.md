@@ -2,6 +2,8 @@
 
 Catches SAP BTP deployment mistakes before `cf deploy`, fixes most of them in one click, and explains failed deploy and app logs. Works in VS Code and SAP Business Application Studio (BAS).
 
+[Product page](https://www.havisun.com/tools/btp-deploy-doctor/) · [Guide: SAP BTP deployment checklist](https://www.havisun.com/insights/sap-btp-deployment-checklist.html)
+
 It covers CAP Node.js services, Fiori apps deployed to the HTML5 application repository (managed approuter, SAP Build Work Zone, Application Frontend service), and multitenant SaaS apps built with MTX.
 
 ![Deploy Doctor finds deployment problems, fixes them and explains a failed deploy log](https://raw.githubusercontent.com/havisun-tech/btp-deploy-doctor/main/media/btp-deploy-doctor-demo.gif)

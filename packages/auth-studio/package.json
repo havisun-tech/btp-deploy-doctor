@@ -2,14 +2,14 @@
   "name": "auth-studio-vscode",
   "displayName": "Auth Studio for SAP BTP",
   "description": "Visual editor for xs-security.json and a view of AMS policies, both checked against your CAP model, plus a local token decoder that explains 401 and 403 errors.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "HavisunTechnologies",
   "license": "Apache-2.0",
   "author": {
     "name": "HAVISUN Technologies Inc.",
     "url": "https://www.havisun.com"
   },
-  "homepage": "https://github.com/havisun-tech/btp-deploy-doctor/tree/main/packages/auth-studio#readme",
+  "homepage": "https://www.havisun.com/tools/auth-studio/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/havisun-tech/btp-deploy-doctor.git",

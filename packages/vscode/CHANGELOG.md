@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 (preview)
+
+- Added links to the product page and guide on havisun.com.
+
 ## 0.2.0 (preview)
 
 - Role checks: roles used in `@requires` and `@restrict` must exist as scopes and be granted by a role template in xs-security.json; role templates and role collections must reference scopes, templates and attributes that exist; `$user` attributes in `where` conditions must be defined. Most come with a one-click fix that keeps the file's formatting.

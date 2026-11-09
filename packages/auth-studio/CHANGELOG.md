@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 (preview)
+
+- Added links to the product page and guide on havisun.com.
+
 ## 0.1.0 (preview)
 
 First release.
