@@ -46,7 +46,7 @@ export interface ServerOptions {
   cfPath?: string;
 }
 
-const VERSION = '0.1.0';
+const VERSION = '0.1.1';
 
 /** Stable ID for one fix of one finding, so it survives a re-check of unchanged files. */
 export function fixId(f: Finding, fixIndex: number): string {
@@ -192,7 +192,7 @@ export function createServer(opts: ServerOptions = {}): McpServer {
   };
 
   const server = new McpServer(
-    { name: 'havisun-sap-btp', version: VERSION },
+    { name: 'havisun-btp-doctor', version: VERSION },
     {
       instructions:
         'Checks SAP BTP Cloud Foundry projects (CAP, MTA, Fiori, multitenant) for deployment problems and explains failed deploy logs. ' +

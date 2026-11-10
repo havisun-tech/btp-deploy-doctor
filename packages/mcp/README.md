@@ -1,4 +1,4 @@
-# MCP server for SAP BTP: deploy, roles and destinations
+# BTP Doctor: MCP server for SAP BTP deploy, roles and destinations
 
 An [MCP](https://modelcontextprotocol.io) server that lets AI assistants check, fix and diagnose SAP BTP Cloud Foundry apps. It brings the checks of all three free HAVISUN extensions to Claude Code, GitHub Copilot, Cursor and any other MCP client:
 
@@ -56,7 +56,7 @@ It needs Node.js 18 or later. `npx` downloads the server on first use.
 **Claude Code**
 
 ```sh
-claude mcp add btp-doctor -- npx -y @havisun/sap-btp-mcp
+claude mcp add btp-doctor -- npx -y @havisun/btp-doctor-mcp
 ```
 
 **VS Code with GitHub Copilot**, in `.vscode/mcp.json`:
@@ -64,7 +64,7 @@ claude mcp add btp-doctor -- npx -y @havisun/sap-btp-mcp
 ```json
 {
   "servers": {
-    "btp-doctor": { "command": "npx", "args": ["-y", "@havisun/sap-btp-mcp", "${workspaceFolder}"] }
+    "btp-doctor": { "command": "npx", "args": ["-y", "@havisun/btp-doctor-mcp", "${workspaceFolder}"] }
   }
 }
 ```
@@ -74,7 +74,7 @@ claude mcp add btp-doctor -- npx -y @havisun/sap-btp-mcp
 ```json
 {
   "mcpServers": {
-    "btp-doctor": { "command": "npx", "args": ["-y", "@havisun/sap-btp-mcp", "/path/to/your/cap-project"] }
+    "btp-doctor": { "command": "npx", "args": ["-y", "@havisun/btp-doctor-mcp", "/path/to/your/cap-project"] }
   }
 }
 ```
@@ -92,10 +92,16 @@ claude mcp add btp-doctor -- npx -y @havisun/sap-btp-mcp
 
 ## Development
 
-To run it from a clone of the repository, use `node /path/to/btp-deploy-doctor/packages/mcp/dist/index.js` instead of `npx -y @havisun/sap-btp-mcp`.
+To run it from a clone of the repository, use `node /path/to/btp-deploy-doctor/packages/mcp/dist/index.js` instead of `npx -y @havisun/btp-doctor-mcp`.
 
 
 ```sh
 npm run build -w packages/mcp
 npm test -w packages/mcp
 ```
+
+## Notes
+
+This package was first published as `@havisun/sap-btp-mcp` (0.1.0) and renamed to `@havisun/btp-doctor-mcp` to make clear that it is a HAVISUN tool, not an SAP product. Replace the old name in your MCP configuration.
+
+Not affiliated with or endorsed by SAP SE. SAP, SAP BTP, SAP Business Application Studio and SAP Fiori are trademarks or registered trademarks of SAP SE in Germany and other countries.
