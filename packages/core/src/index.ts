@@ -18,3 +18,8 @@ export type { CdsAuth, RoleUse, CdsGrant } from './cds-roles';
 export { mtaModules, mtaResources, isXsuaa, instanceName } from './rules/mta-model';
 export { scanAms, parseDcl, dclRootOf, policiesForRole, policyText, scanAmsMappings } from './ams';
 export type { AmsModel, DclPolicy, DclAttribute, DclRoleAssignment, DclUse, DclGrant, DclRef, AmsAttributeMapping } from './ams';
+export { ConnectivitySession, configChecks, lookupChecks, explainTokenError, explainResponse, explainNetworkError, maskConfig, capDestinations, worst, AUTH_TYPES } from './connectivity/diagnose';
+export type { AppReport, DestinationReport, Check as ConnectivityCheck, Status as ConnectivityStatus, CheckOptions as ConnectivityOptions } from './connectivity/diagnose';
+export { cfTarget, listApps, appServices } from './connectivity/cf-app';
+export type { CfTarget, CfApp } from './connectivity/cf-app';
+export { formatConnectivity } from './connectivity/format';

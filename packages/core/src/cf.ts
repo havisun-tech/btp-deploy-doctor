@@ -15,7 +15,7 @@ function assertArg(value: string, what: string) {
   if (!value || value.startsWith('-') || /\s/.test(value)) throw new CfError(`Invalid ${what}: "${value}"`);
 }
 
-function runCf(args: string[], opts: CfOptions): Promise<string> {
+export function runCf(args: string[], opts: CfOptions): Promise<string> {
   const cf = opts.cfPath || 'cf';
   return new Promise((resolve, reject) => {
     execFile(cf, args, { cwd: opts.cwd, maxBuffer: 64 * 1024 * 1024 }, (err, stdout, stderr) => {

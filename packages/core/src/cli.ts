@@ -7,6 +7,8 @@ import { runChecks } from './check';
 import { autoFixable, fixAll } from './fix/apply';
 import { checkToJson, formatCheck, formatDiagnose, formatFixDryRun, formatFixResult } from './format';
 import { analyzeLog } from './logs/analyze';
+import { ConnectivitySession } from './connectivity/diagnose';
+import { formatConnectivity } from './connectivity/format';
 
 const HELP = `btp-doctor – find and explain SAP BTP / CAP deployment problems
 
@@ -17,16 +19,19 @@ Usage:
   btp-doctor diagnose --app <name>      Fetch and explain "cf logs <name> --recent"
   btp-doctor diagnose --mta-op <id>     Fetch and explain "cf dmol -i <id>"
   cf deploy ... 2>&1 | btp-doctor diagnose   Explain piped output
+  btp-doctor connectivity --app <name> [dir]  Check a deployed app's destinations (uses your cf login)
 
 Options:
   --json           Machine-readable output
   --dry-run        With fix: show the changes without writing them
+  --destination <name>  With connectivity: check only this destination (repeatable)
+  --test-call      With connectivity: also call Internet destinations from this machine
   --cf <path>      Path to the cf CLI (default: cf)
   --no-color       Disable colors
   -h, --help       Show this help
   -v, --version    Show version
 
-Exit codes: check exits 1 when errors are found. diagnose exits 1 when a known problem is found.`;
+Exit codes: check and connectivity exit 1 when errors are found. diagnose exits 1 when a known problem is found.`;
 
 function version(): string {
   try {
@@ -55,6 +60,8 @@ async function main(argv: string[]): Promise<number> {
       'dry-run': { type: 'boolean' },
       app: { type: 'string' },
       'mta-op': { type: 'string' },
+      destination: { type: 'string', multiple: true },
+      'test-call': { type: 'boolean' },
       cf: { type: 'string' },
       'no-color': { type: 'boolean' },
       help: { type: 'boolean', short: 'h' },
@@ -104,6 +111,20 @@ async function main(argv: string[]): Promise<number> {
     const result = analyzeLog(text);
     console.log(values.json ? JSON.stringify(result, null, 2) : formatDiagnose(result, { color }));
     return result.matches.length > 0 ? 1 : 0;
+  }
+
+  if (cmd === 'connectivity') {
+    if (!values.app) {
+      console.error('connectivity needs --app <name> (a deployed app in the targeted space).\n\n' + HELP);
+      return 2;
+    }
+    const root = path.resolve(arg ?? process.cwd());
+    const session = await ConnectivitySession.forApp(values.app, { cf: { cfPath: values.cf }, projectRoot: root, only: values.destination });
+    if (values['test-call']) {
+      for (const d of session.report.destinations) if (d.callable && !d.userDependent) d.checks.push(await session.testCall(d.name));
+    }
+    console.log(values.json ? JSON.stringify(session.report, null, 2) : formatConnectivity(session.report, { color }));
+    return session.report.status === 'error' || session.report.destinations.some((d) => d.checks.some((k) => k.status === 'error')) ? 1 : 0;
   }
 
   console.error(`Unknown command "${cmd}".\n\n${HELP}`);

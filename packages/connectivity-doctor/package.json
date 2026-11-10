@@ -1,0 +1,91 @@
+{
+  "name": "connectivity-doctor-vscode",
+  "displayName": "Connectivity Doctor for SAP BTP",
+  "description": "Checks the destinations of a deployed SAP BTP app: finds missing and misspelled destinations, failing OAuth tokens, Cloud Connector setup mistakes and missing bindings, and explains each one.",
+  "version": "0.1.0",
+  "publisher": "HavisunTechnologies",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "HAVISUN Technologies Inc.",
+    "url": "https://www.havisun.com"
+  },
+  "homepage": "https://github.com/havisun-tech/btp-deploy-doctor/tree/main/packages/connectivity-doctor#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/havisun-tech/btp-deploy-doctor.git",
+    "directory": "packages/connectivity-doctor"
+  },
+  "bugs": {
+    "url": "https://github.com/havisun-tech/btp-deploy-doctor/issues"
+  },
+  "icon": "images/icon.png",
+  "preview": true,
+  "galleryBanner": {
+    "color": "#4a2391",
+    "theme": "dark"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Testing",
+    "Other"
+  ],
+  "keywords": [
+    "sap",
+    "btp",
+    "cap",
+    "destination",
+    "destinations",
+    "connectivity",
+    "cloud connector",
+    "on-premise",
+    "oauth",
+    "principal propagation",
+    "cloud foundry"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "connectivityDoctor.open",
+        "title": "Check Destinations of a Deployed App",
+        "category": "Connectivity Doctor",
+        "icon": "$(plug)"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "connectivityDoctor.open",
+          "when": "resourceFilename =~ /^mta\\.ya?ml$/",
+          "group": "navigation@9"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Connectivity Doctor for SAP BTP",
+      "properties": {
+        "connectivityDoctor.cfPath": {
+          "type": "string",
+          "default": "cf",
+          "description": "Path to the Cloud Foundry CLI. Connectivity Doctor uses your cf login to read the app's service bindings."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "esbuild src/extension.ts --bundle --platform=node --main-fields=module,main --format=cjs --target=node18 --external:vscode --outfile=dist/extension.js --sourcemap",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "package": "npm run build && npx --yes @vscode/vsce package --no-dependencies"
+  },
+  "dependencies": {
+    "btp-deploy-doctor": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/vscode": "~1.85.0",
+    "esbuild": "^0.23.0",
+    "typescript": "^5.5.0"
+  }
+}

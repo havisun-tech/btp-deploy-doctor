@@ -6,12 +6,13 @@
     "packages/core",
     "packages/mcp",
     "packages/vscode",
-    "packages/auth-studio"
+    "packages/auth-studio",
+    "packages/connectivity-doctor"
   ],
   "scripts": {
-    "build": "npm run build -w packages/core && npm run build -w packages/mcp && npm run build -w packages/vscode && npm run build -w packages/auth-studio",
+    "build": "npm run build -w packages/core && npm run build -w packages/mcp && npm run build -w packages/vscode && npm run build -w packages/auth-studio && npm run build -w packages/connectivity-doctor",
     "test": "npm run build -w packages/core && npm run build -w packages/mcp && npm test -w packages/core && npm test -w packages/mcp && npm test -w packages/auth-studio",
-    "typecheck": "npm run typecheck -w packages/vscode && npm run typecheck -w packages/auth-studio"
+    "typecheck": "npm run typecheck -w packages/vscode && npm run typecheck -w packages/auth-studio && npm run typecheck -w packages/connectivity-doctor"
   },
   "repository": {
     "type": "git",

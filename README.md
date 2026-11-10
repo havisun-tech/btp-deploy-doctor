@@ -14,6 +14,7 @@ Product pages: [Deploy Doctor](https://www.havisun.com/tools/btp-deploy-doctor/)
 | [`packages/core`](packages/core) | `btp-doctor` CLI and library: project checks, log analyzer, cf log fetching |
 | [`packages/vscode`](packages/vscode) | VS Code extension. Also runs in SAP Business Application Studio (BAS) |
 | [`packages/auth-studio`](packages/auth-studio) | Auth Studio for SAP BTP: visual editor for xs-security.json and a view of AMS policies, checked against the CAP model, plus a local token decoder |
+| [`packages/connectivity-doctor`](packages/connectivity-doctor) | Connectivity Doctor for SAP BTP: checks a deployed app's destinations with the runtime lookup, tests tokens and calls, and explains Cloud Connector and binding problems |
 | [`packages/mcp`](packages/mcp) | MCP server, so AI assistants such as Claude Code, Copilot and Cursor can check, fix and diagnose |
 
 ## Install

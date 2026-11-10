@@ -10,6 +10,7 @@ btp-doctor diagnose deploy.log         # explain a saved log
 cf deploy mta_archives/x.mtar 2>&1 | btp-doctor diagnose
 btp-doctor diagnose --app my-srv       # runs cf logs my-srv --recent
 btp-doctor diagnose --mta-op <id>      # runs cf dmol -i <id>
+btp-doctor connectivity --app my-srv   # checks the app's destinations with your cf login
 ```
 
 Add `--json` for machine-readable output. `check` exits 1 when it finds errors, so it can gate CI.
