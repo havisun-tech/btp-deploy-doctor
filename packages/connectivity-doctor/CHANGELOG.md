@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 (preview)
+
+- Screenshots in the README.
+
 ## 0.1.0 (preview)
 
 First release.

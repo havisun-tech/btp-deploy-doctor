@@ -4,6 +4,8 @@ Finds out why a deployed SAP BTP app cannot reach another system. It checks ever
 
 [Product page and guides on havisun.com](https://www.havisun.com/tools/) · [Deploy Doctor](https://marketplace.visualstudio.com/items?itemName=HavisunTechnologies.btp-deploy-doctor-vscode) · [Auth Studio](https://marketplace.visualstudio.com/items?itemName=HavisunTechnologies.auth-studio-vscode)
 
+![Connectivity Doctor checks the destinations of a deployed app: a destination whose OAuth client is rejected, and an OnPremise destination without a Connectivity service binding](https://raw.githubusercontent.com/havisun-tech/btp-deploy-doctor/main/media/connectivity-doctor-overview.png)
+
 > **Preview.** Please [report problems or ideas](https://github.com/havisun-tech/btp-deploy-doctor/issues/new/choose).
 
 ## Use it
@@ -29,6 +31,8 @@ Finds out why a deployed SAP BTP app cannot reach another system. It checks ever
 **Test it**
 - **Call from here** sends a GET request to an Internet destination with the credentials the Destination service returns, optionally to a path such as `.../$metadata`, and explains the answer (401, 403, 404, redirects to a login page, TLS and DNS errors).
 - **Test the token exchange** for OAuth2UserTokenExchange, OAuth2JWTBearer and OAuth2SAMLBearerAssertion with a user token you paste.
+
+![A test call to an Internet destination answers HTTP 200, with the destination configuration below](https://raw.githubusercontent.com/havisun-tech/btp-deploy-doctor/main/media/connectivity-doctor-call.png)
 
 **Copy report as text** gives a report without secrets or tokens, for a ticket or a colleague.
 
