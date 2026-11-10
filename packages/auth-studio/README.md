@@ -53,6 +53,13 @@ Everything runs locally. The extension sends no telemetry and makes no network r
 
 Writing `@requires` and `@restrict` annotations into your `.cds` files (Auth Studio links to the line instead), editing AMS policies in a form (they stay text, with checks and links), assigning role collections or policies to users, and CAP Java projects.
 
+## More free tools for SAP BTP
+
+- [Deploy Doctor for SAP BTP](https://marketplace.visualstudio.com/items?itemName=HavisunTechnologies.btp-deploy-doctor-vscode): catches deployment mistakes before `cf deploy` and explains failed deploy logs.
+- [Connectivity Doctor for SAP BTP](https://marketplace.visualstudio.com/items?itemName=HavisunTechnologies.connectivity-doctor-vscode): checks a deployed app's destinations, OAuth tokens and Cloud Connector setup.
+
+All on [havisun.com/tools](https://www.havisun.com/tools/).
+
 Made by [HAVISUN Technologies](https://www.havisun.com). Licensed under Apache 2.0.
 
 Not affiliated with or endorsed by SAP SE. SAP, SAP BTP, SAP Business Application Studio and SAP Fiori are trademarks or registered trademarks of SAP SE in Germany and other countries.

@@ -3,6 +3,7 @@
 ## 0.2.1 (preview)
 
 - Added links to the product page and guide on havisun.com.
+- Links to the other free tools: Auth Studio and Connectivity Doctor.
 
 ## 0.2.0 (preview)
 

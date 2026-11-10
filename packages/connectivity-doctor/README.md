@@ -64,6 +64,13 @@ It exits with code 1 when it finds errors.
 
 - `connectivityDoctor.cfPath`: path to the Cloud Foundry CLI (default `cf`).
 
+## More free tools for SAP BTP
+
+- [Deploy Doctor for SAP BTP](https://marketplace.visualstudio.com/items?itemName=HavisunTechnologies.btp-deploy-doctor-vscode): catches deployment mistakes before `cf deploy` and explains failed deploy logs.
+- [Auth Studio for SAP BTP](https://marketplace.visualstudio.com/items?itemName=HavisunTechnologies.auth-studio-vscode): visual editor for xs-security.json and AMS policies, and explains 401 and 403 errors.
+
+All on [havisun.com/tools](https://www.havisun.com/tools/).
+
 ---
 
 Made by [HAVISUN Technologies](https://www.havisun.com). Licensed under Apache 2.0.

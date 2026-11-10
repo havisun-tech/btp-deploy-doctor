@@ -3,6 +3,7 @@
 ## 0.1.1 (preview)
 
 - Added links to the product page and guide on havisun.com.
+- Links to the other free tools: Deploy Doctor and Connectivity Doctor.
 
 ## 0.1.0 (preview)
 

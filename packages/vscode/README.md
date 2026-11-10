@@ -56,6 +56,13 @@ The same checks run as a CLI for CI pipelines and as an MCP server for AI assist
 
 Not covered yet: CAP Java and Kyma.
 
+## More free tools for SAP BTP
+
+- [Auth Studio for SAP BTP](https://marketplace.visualstudio.com/items?itemName=HavisunTechnologies.auth-studio-vscode): visual editor for xs-security.json and AMS policies, and explains 401 and 403 errors.
+- [Connectivity Doctor for SAP BTP](https://marketplace.visualstudio.com/items?itemName=HavisunTechnologies.connectivity-doctor-vscode): checks a deployed app's destinations, OAuth tokens and Cloud Connector setup.
+
+All on [havisun.com/tools](https://www.havisun.com/tools/).
+
 Made by [HAVISUN Technologies](https://www.havisun.com). Licensed under Apache 2.0.
 
 Not affiliated with or endorsed by SAP SE. SAP, SAP BTP, SAP Business Application Studio and SAP Fiori are trademarks or registered trademarks of SAP SE in Germany and other countries.

@@ -5,7 +5,15 @@
 
 Finds SAP BTP / CAP deployment mistakes **before** `cf deploy`, fixes most of them automatically, and explains failed deploy and app logs **after** it. Covers CAP services, roles and login (XSUAA, and AMS policies on IAS), Fiori apps in the HTML5 application repository (managed approuter, Work Zone) and multitenant SaaS apps.
 
-Product pages: [Deploy Doctor](https://www.havisun.com/tools/btp-deploy-doctor/) and [Auth Studio](https://www.havisun.com/tools/auth-studio/) on havisun.com. Guides: [SAP BTP deployment checklist](https://www.havisun.com/insights/sap-btp-deployment-checklist.html) and [Why a CAP app returns 403 after deploy](https://www.havisun.com/insights/sap-cap-403-forbidden-after-deploy.html).
+This repository has three free extensions for VS Code and SAP Business Application Studio:
+
+| Extension | What it does | Install |
+|---|---|---|
+| **Deploy Doctor for SAP BTP** | Catches deployment mistakes before `cf deploy`, fixes most of them, and explains failed deploy and app logs | [VS Code](https://marketplace.visualstudio.com/items?itemName=HavisunTechnologies.btp-deploy-doctor-vscode) · [Open VSX](https://open-vsx.org/extension/HavisunTechnologies/btp-deploy-doctor-vscode) |
+| **[Auth Studio for SAP BTP](packages/auth-studio)** | Visual editor for xs-security.json and AMS policies, checked against the CAP model, plus a local token decoder for 401 and 403 errors | [VS Code](https://marketplace.visualstudio.com/items?itemName=HavisunTechnologies.auth-studio-vscode) · [Open VSX](https://open-vsx.org/extension/HavisunTechnologies/auth-studio-vscode) |
+| **[Connectivity Doctor for SAP BTP](packages/connectivity-doctor)** | Checks a deployed app's destinations with the runtime lookup: missing destinations, OAuth token errors, Connectivity binding and Cloud Connector setup, test calls | [VS Code](https://marketplace.visualstudio.com/items?itemName=HavisunTechnologies.connectivity-doctor-vscode) · [Open VSX](https://open-vsx.org/extension/HavisunTechnologies/connectivity-doctor-vscode) |
+
+Product pages: [Deploy Doctor](https://www.havisun.com/tools/btp-deploy-doctor/), [Auth Studio](https://www.havisun.com/tools/auth-studio/) and [Connectivity Doctor](https://www.havisun.com/tools/connectivity-doctor/) on havisun.com. Guides: [SAP BTP deployment checklist](https://www.havisun.com/insights/sap-btp-deployment-checklist.html) and [Why a CAP app returns 403 after deploy](https://www.havisun.com/insights/sap-cap-403-forbidden-after-deploy.html).
 
 ![Deploy Doctor for SAP BTP finds deployment problems, fixes them and explains a failed deploy log](media/btp-deploy-doctor-demo.gif)
 
@@ -19,8 +27,8 @@ Product pages: [Deploy Doctor](https://www.havisun.com/tools/btp-deploy-doctor/)
 
 ## Install
 
-- **VS Code:** search for "Deploy Doctor" in the Extensions view, or install it from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=HavisunTechnologies.btp-deploy-doctor-vscode).
-- **SAP Business Application Studio:** search for "Deploy Doctor" in the Extensions view. BAS installs it from [Open VSX](https://open-vsx.org/extension/HavisunTechnologies/btp-deploy-doctor-vscode).
+- **VS Code:** search for "Deploy Doctor", "Auth Studio" or "Connectivity Doctor" in the Extensions view, or use the Marketplace links in the table above.
+- **SAP Business Application Studio:** search for the same names in the Extensions view. BAS installs them from Open VSX.
 
 ## Try it
 
@@ -30,6 +38,9 @@ npm run build
 node packages/core/dist/cli.js check examples/broken-bookshop
 node packages/core/dist/cli.js diagnose examples/broken-bookshop/deploy.log
 node packages/core/dist/cli.js fix --dry-run examples/broken-bookshop
+
+# needs cf login; checks the destinations of a deployed app
+node packages/core/dist/cli.js connectivity --app <app-name>
 ```
 
 Examples, each with a matching failed `deploy.log`:
