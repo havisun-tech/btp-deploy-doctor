@@ -23,3 +23,6 @@ export type { AppReport, DestinationReport, Check as ConnectivityCheck, Status a
 export { cfTarget, listApps, appServices } from './connectivity/cf-app';
 export type { CfTarget, CfApp } from './connectivity/cf-app';
 export { formatConnectivity } from './connectivity/format';
+export * from './auth/xsuaa';
+export * from './auth/project';
+export * from './auth/ams-state';

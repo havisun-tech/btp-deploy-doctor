@@ -7,7 +7,7 @@ async function main() {
   const server = createServer({ defaultRoot: root });
   await server.connect(new StdioServerTransport());
   // stdout carries the protocol; log to stderr only.
-  console.error(`btp-deploy-doctor MCP server running on stdio (project: ${root ?? process.cwd()})`);
+  console.error(`HAVISUN SAP BTP MCP server running on stdio (project: ${root ?? process.cwd()})`);
 }
 
 main().catch((err) => {

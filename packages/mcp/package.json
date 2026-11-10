@@ -1,7 +1,7 @@
 {
-  "name": "btp-deploy-doctor-mcp",
+  "name": "@havisun/sap-btp-mcp",
   "version": "0.1.0",
-  "description": "MCP server that lets AI assistants check, fix and diagnose SAP BTP / CAP deployments.",
+  "description": "MCP server that lets AI assistants check, fix and diagnose SAP BTP apps: CAP/MTA/Fiori deployments, XSUAA and AMS roles, JWTs, and destinations.",
   "license": "Apache-2.0",
   "author": {
     "name": "HAVISUN Technologies Inc.",
@@ -19,6 +19,7 @@
   "main": "dist/server.js",
   "types": "dist/server.d.ts",
   "bin": {
+    "sap-btp-mcp": "dist/index.js",
     "btp-doctor-mcp": "dist/index.js"
   },
   "files": [
@@ -27,6 +28,9 @@
   ],
   "engines": {
     "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json && chmod +x dist/index.js",
@@ -44,10 +48,17 @@
   "keywords": [
     "sap",
     "btp",
+    "sap-btp",
     "cap",
+    "fiori",
     "mcp",
+    "mcp-server",
     "model-context-protocol",
     "cloud-foundry",
-    "mta"
+    "mta",
+    "xsuaa",
+    "ams",
+    "destination",
+    "connectivity"
   ]
 }

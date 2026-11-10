@@ -19,11 +19,11 @@ Product pages: [Deploy Doctor](https://www.havisun.com/tools/btp-deploy-doctor/)
 
 | Package | What it is |
 |---|---|
-| [`packages/core`](packages/core) | `btp-doctor` CLI and library: project checks, log analyzer, cf log fetching |
+| [`packages/core`](packages/core) | `btp-doctor` CLI and library: project checks, log analyzer, cf log fetching, the role and token model, and the destination checks |
 | [`packages/vscode`](packages/vscode) | VS Code extension. Also runs in SAP Business Application Studio (BAS) |
 | [`packages/auth-studio`](packages/auth-studio) | Auth Studio for SAP BTP: visual editor for xs-security.json and a view of AMS policies, checked against the CAP model, plus a local token decoder |
 | [`packages/connectivity-doctor`](packages/connectivity-doctor) | Connectivity Doctor for SAP BTP: checks a deployed app's destinations with the runtime lookup, tests tokens and calls, and explains Cloud Connector and binding problems |
-| [`packages/mcp`](packages/mcp) | MCP server, so AI assistants such as Claude Code, Copilot and Cursor can check, fix and diagnose |
+| [`packages/mcp`](packages/mcp) | MCP server with the checks of all three extensions, so AI assistants such as Claude Code, Copilot and Cursor can check deployments, roles, tokens and destinations |
 
 ## Install
 
@@ -53,7 +53,7 @@ Examples, each with a matching failed `deploy.log`:
 | `examples/broken-auth` | Roles and login: roles missing from xs-security.json, bad references, approuter binding, token forwarding, 401/403 logs |
 | `examples/broken-ams` | IAS with AMS policies: a role no policy assigns, typos in roles, policies and attributes, schema mapping, policy deployer |
 
-To try the MCP server in Claude Code, open this folder and approve the `btp-doctor` server from `.mcp.json`. Then ask, for example, "check examples/broken-fiori and fix what's safe". Setup for other clients is in [packages/mcp/README.md](packages/mcp/README.md).
+To try the MCP server in Claude Code, open this folder and approve the `btp-doctor` server from `.mcp.json`. Then ask, for example, "check examples/broken-fiori and fix what's safe" or "which roles in examples/broken-auth can no user get?". Setup for other clients is in [packages/mcp/README.md](packages/mcp/README.md).
 
 ## Tested on public projects
 

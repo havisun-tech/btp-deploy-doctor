@@ -40,7 +40,7 @@ describe('MCP server', () => {
   it('lists the tools with annotations', async () => {
     const { tools } = await client.listTools();
     const names = tools.map((t) => t.name).sort();
-    assert.deepEqual(names, ['apply_fix', 'check_project', 'diagnose_cf_app', 'diagnose_log', 'diagnose_mta_operation', 'fix_all', 'preview_fix']);
+    assert.deepEqual(names, ['add_missing_roles', 'apply_fix', 'check_destinations', 'check_project', 'check_roles', 'diagnose_cf_app', 'diagnose_log', 'diagnose_mta_operation', 'explain_token', 'fix_all', 'list_cf_apps', 'preview_fix', 'test_destination_call']);
     assert.equal(tools.find((t) => t.name === 'check_project')!.annotations?.readOnlyHint, true);
     assert.equal(tools.find((t) => t.name === 'apply_fix')!.annotations?.readOnlyHint, false);
   });
