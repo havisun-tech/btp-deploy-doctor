@@ -6,6 +6,8 @@ import { lineAt } from './util';
 export const PSEUDO_ROLES = new Set(['any', 'authenticated-user', 'identified-user', 'system-user', 'internal-user']);
 /** $user properties CAP fills itself, not from XSUAA attributes. */
 const BUILTIN_USER_PROPS = new Set(['id', 'locale', 'tenant', 'is', 'attr', 'roles', 'name']);
+/** $user.<name>, also $user.attr.<name> (CAP Java style). */
+const USER_ATTR = /\$user\.(?:attr\.)?([A-Za-z_]\w*)/g;
 
 export interface RoleUse {
   role: string;
@@ -25,7 +27,7 @@ export const templateNameFor = (role: string) => role.replace(/[^A-Za-z0-9_]/g, 
 export interface CdsAuth {
   /** Roles from @requires and @restrict "to", first use of each. */
   roles: RoleUse[];
-  /** User attributes read in @restrict "where" conditions, as $user.<name>. */
+  /** User attributes the model reads as $user.<name>: in @restrict "where" conditions, view and projection "where" clauses, or anywhere else. */
   attributes: RoleUse[];
   grants: CdsGrant[];
   filesScanned: number;
@@ -130,13 +132,17 @@ export function scanCdsAuth(root: string): CdsAuth {
     } catch {
       continue;
     }
-    if (!/requires|restrict/.test(raw)) continue;
+    if (!/requires|restrict|\$user\./.test(raw)) continue;
     const src = blankComments(raw);
     const rel = path.relative(root, abs).split(path.sep).join('/');
     const addRole = (s: string, at: number) => {
       const role = s.trim();
       if (!role || PSEUDO_ROLES.has(role) || roles.has(role)) return;
       roles.set(role, { role, file: rel, line: lineAt(src, at) });
+    };
+    const addAttr = (name: string, at: number) => {
+      if (BUILTIN_USER_PROPS.has(name) || attributes.has(name)) return;
+      attributes.set(name, { role: name, file: rel, line: lineAt(src, at) });
     };
 
     // @requires: 'X'   @requires: ['X', 'Y']   @(requires: ..., ...)
@@ -158,11 +164,7 @@ export function scanCdsAuth(root: string): CdsAuth {
         const value = block[start] === '[' ? block.slice(start, closing(block, start) + 1) : /^'(?:[^']|'')*'/.exec(block.slice(start))?.[0] ?? '';
         for (const { s, at } of stringsIn(value, open + start)) addRole(s, at);
       }
-      for (const a of block.matchAll(/\$user\.([A-Za-z_]\w*)/g)) {
-        const name = a[1];
-        if (BUILTIN_USER_PROPS.has(name) || attributes.has(name)) continue;
-        attributes.set(name, { role: name, file: rel, line: lineAt(src, open + (a.index ?? 0)) });
-      }
+      for (const a of block.matchAll(USER_ATTR)) addAttr(a[1], open + (a.index ?? 0));
       // Each { ... } entry of the array is one grant.
       for (let i = 1; i < block.length; i++) {
         if (block[i] === "'") {
@@ -175,11 +177,14 @@ export function scanCdsAuth(root: string): CdsAuth {
         const to = /\bto\s*:\s*/.exec(entry);
         const value = to ? (entry[to.index + to[0].length] === '[' ? entry.slice(to.index + to[0].length, closing(entry, to.index + to[0].length) + 1) : /^'(?:[^']|'')*'/.exec(entry.slice(to.index + to[0].length))?.[0] ?? '') : '';
         const roleList = stringsIn(value, 0).map((x) => x.s.trim()).filter((r) => r && !PSEUDO_ROLES.has(r));
-        const attrList = [...new Set([...entry.matchAll(/\$user\.([A-Za-z_]\w*)/g)].map((m) => m[1]).filter((n) => !BUILTIN_USER_PROPS.has(n)))];
+        const attrList = [...new Set([...entry.matchAll(USER_ATTR)].map((m) => m[1]).filter((n) => !BUILTIN_USER_PROPS.has(n)))];
         if (roleList.length || attrList.length) grants.push({ roles: roleList, attributes: attrList });
         i = end;
       }
     }
+
+    // $user.<name> outside @restrict too, e.g. "as projection on my.Orders where country = $user.country".
+    for (const a of src.matchAll(USER_ATTR)) addAttr(a[1], a.index ?? 0);
   }
   return { roles: [...roles.values()], attributes: [...attributes.values()], grants, filesScanned: files.length };
 }

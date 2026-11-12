@@ -94,7 +94,7 @@ test('AUTH001 role used in CDS but missing from xs-security.json, fix adds scope
   const after = xs(dir);
   assert.ok(after.scopes.some((s: any) => s.name === '$XSAPPNAME.Viewer'));
   assert.ok(after['role-templates'].some((t: any) => t.name === 'Viewer' && t['scope-references'].includes('$XSAPPNAME.Viewer')));
-  assert.deepEqual(auth(dir).filter((x) => x.ruleId !== 'AUTH006'), []);
+  assert.deepEqual(auth(dir).filter((x) => x.ruleId !== 'AUTH006' && x.ruleId !== 'AUTH007'), []);
 });
 
 test('AUTH001 with only a case difference asks for review instead of auto-fixing', () => {
@@ -153,6 +153,46 @@ test('AUTH006 $user attribute in a where condition that XSUAA does not define', 
   const f = findingOf(project({ 'xs-security.json': xsWith((x) => { x.attributes = []; delete (x['role-templates'][1] as any)['attribute-references']; }) }), 'AUTH006');
   assert.match(f.title, /"country"/);
   assert.equal(f.location.file, 'srv/admin-service.cds');
+});
+
+const PROJECTION_SERVICE = `using { sap.capire.bookshop as my } from '../db/schema';
+
+service CatalogService @(requires: 'authenticated-user') {
+  // Instance-level restriction in the view itself
+  entity Orders as projection on my.Orders
+    where Country = $user.country and Plant = $user.attr.plant and CreatedBy = $user.id;
+}
+
+annotate CatalogService.Orders with @(restrict: [
+  { grant: 'READ', to: 'Viewer' },
+  { grant: '*', to: 'Admin', where: 'amount < 10000' }
+]);
+`;
+
+test('$user attributes are read from projection where clauses too, not only @restrict', () => {
+  const dir = project({ 'srv/admin-service.cds': PROJECTION_SERVICE });
+  const r = scanCdsAuth(dir);
+  assert.deepEqual(r.roles.map((x) => x.role).sort(), ['Admin', 'Viewer']);
+  assert.deepEqual(r.attributes, [
+    { role: 'country', file: 'srv/admin-service.cds', line: 6 },
+    { role: 'plant', file: 'srv/admin-service.cds', line: 6 },
+  ]);
+  // The grants carry no attributes: the view filter applies to every role.
+  assert.deepEqual(r.grants, [{ roles: ['Viewer'], attributes: [] }, { roles: ['Admin'], attributes: [] }]);
+  const f = findingOf(dir, 'AUTH006');
+  assert.match(f.title, /"plant"/);
+  assert.equal(f.location.line, 6);
+});
+
+test('AUTH007 attribute defined but referenced by no role template', () => {
+  const dir = project({ 'xs-security.json': xsWith((x) => { delete (x['role-templates'][1] as any)['attribute-references']; }) });
+  const f = findingOf(dir, 'AUTH007');
+  assert.equal(f.severity, 'warning');
+  assert.match(f.title, /"country"/);
+  assert.equal(f.location.file, 'srv/admin-service.cds');
+  // Object-style references count too.
+  const obj = project({ 'xs-security.json': xsWith((x) => { (x['role-templates'][1] as any)['attribute-references'] = [{ name: 'country', 'default-values': ['DE'] }]; }) });
+  assert.deepEqual(auth(obj), []);
 });
 
 // ---------------- approuter ----------------

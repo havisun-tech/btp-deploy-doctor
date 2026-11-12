@@ -194,11 +194,16 @@ function roleRules(p: Project, resources: MtaResource[], services: MtaModule[]):
     });
   });
 
-  // AUTH006 – user attributes in @restrict where conditions must exist in XSUAA
+  // AUTH006 / AUTH007 – user attributes the model reads must exist in XSUAA and reach users through a role template
   {
+    const refName = (a: unknown) => (typeof a === 'string' ? a : isPlainObject(a) && typeof a.name === 'string' ? a.name : undefined);
+    const referenced = new Set(templates.flatMap((t) => asArray(t['attribute-references']).map(refName).filter((n): n is string => !!n)));
     for (const a of cds.attributes) {
-      if (attributeNames.includes(a.role)) continue;
-      add('AUTH006', 'warning', `User attribute "${a.role}" is not defined in xs-security.json`, `A @restrict condition reads $user.${a.role}, but ${srcOf('attributes')} defines no attribute "${a.role}". Users never carry it, so the condition matches no rows and they see empty lists or 403 errors.`, `Add { "name": "${a.role}", "valueType": "string" } to "attributes" and reference it from the role templates that need it.`, a as RoleUse);
+      if (!attributeNames.includes(a.role)) {
+        add('AUTH006', 'warning', `User attribute "${a.role}" is not defined in xs-security.json`, `The CDS model reads $user.${a.role}, but ${srcOf('attributes')} defines no attribute "${a.role}". Users never carry it, so conditions on it match no rows and users see empty lists or 403 errors.`, `Add { "name": "${a.role}", "valueType": "string" } to "attributes" and reference it from the role templates that need it.`, a as RoleUse);
+      } else if (templates.length && !referenced.has(a.role)) {
+        add('AUTH007', 'warning', `User attribute "${a.role}" is in no role template`, `The CDS model reads $user.${a.role}, and ${srcOf('attributes')} defines the attribute, but no role template lists it under "attribute-references". Users only get attribute values through roles made from such a template, so conditions on it match no rows and users see empty lists or 403 errors.`, `Add "${a.role}" to "attribute-references" of the role templates whose users need it, then set the value in the roles (BTP cockpit) or map it from your identity provider.`, a as RoleUse);
+      }
     }
   }
   return out;

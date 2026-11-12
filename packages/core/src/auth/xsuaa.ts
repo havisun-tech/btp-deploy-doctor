@@ -297,7 +297,10 @@ export function issues(d: Descriptor, cds?: CdsAuth, deployed = false): Issue[] 
       if (!r.scope) out.push({ severity: 'error', message: `CDS role "${r.role}" has no scope, so requests that need it fail with 403.` });
       else if (!r.templates.length) out.push({ severity: 'warning', message: `CDS role "${r.role}" is not granted by any role template.` });
     }
-    for (const a of attributeStatus(d, cds)) if (!a.defined) out.push({ severity: 'warning', message: `CDS reads $user.${a.name}, but the attribute is not defined.` });
+    for (const a of attributeStatus(d, cds)) {
+      if (!a.defined) out.push({ severity: 'warning', message: `CDS reads $user.${a.name}, but the attribute is not defined.` });
+      else if (d.templates.length && !a.templates.length) out.push({ severity: 'warning', message: `CDS reads $user.${a.name}, but no role template references the attribute, so no user gets a value for it.` });
+    }
   }
   return out;
 }
